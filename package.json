@@ -14,7 +14,7 @@
     "package-post": "ncc build lib/post/main.js --source-map --license licenses.txt -o dist/post",
     "package": "npm run 'package-main' && npm run 'package-post'",
     "test": "jest",
-    "all": "npm run clean && npm run build && npm run format && npm run lint && npm run package && npm test"
+    "all": "npm run clean && npm run format && npm run lint && npm run build && npm run package && npm test"
   },
   "repository": {
     "type": "git",

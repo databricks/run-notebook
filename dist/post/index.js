@@ -33,8 +33,8 @@ class ApiClient {
         return __awaiter(this, void 0, void 0, function* () {
             const headers = {
                 Authorization: `Bearer ${this.token}`,
-                "User-Agent": `databricks-github-action-run-notebook/${this.actionVerson}`,
-                "Content-Type": "text/json",
+                'User-Agent': `databricks-github-action-run-notebook/${this.actionVerson}`,
+                'Content-Type': 'text/json'
             };
             return (0, request_1.httpRequest)(this.host, path, method, headers, body);
         });
@@ -43,28 +43,28 @@ class ApiClient {
     triggerNotebookJob(path, clusterSpec, librariesSpec, paramsSpec, aclListSpec, timeoutSpec, runNameSpec, gitSourceSpec) {
         return __awaiter(this, void 0, void 0, function* () {
             const requestBody = Object.assign(Object.assign(Object.assign(Object.assign({ tasks: [
-                    Object.assign(Object.assign({ task_key: constants_1.JOB_RUN_TASK_KEY, notebook_task: Object.assign({ notebook_path: path }, paramsSpec) }, clusterSpec), librariesSpec),
+                    Object.assign(Object.assign({ task_key: constants_1.JOB_RUN_TASK_KEY, notebook_task: Object.assign({ notebook_path: path }, paramsSpec) }, clusterSpec), librariesSpec)
                 ] }, aclListSpec), timeoutSpec), runNameSpec), gitSourceSpec);
-            const response = (yield this.request("/api/2.1/jobs/runs/submit", "POST", requestBody));
+            const response = (yield this.request('/api/2.1/jobs/runs/submit', 'POST', requestBody));
             return response.run_id;
         });
     }
     awaitJobAndGetOutput(runId) {
         return __awaiter(this, void 0, void 0, function* () {
             const requestBody = { run_id: runId };
-            const response = (yield this.request("/api/2.1/jobs/runs/get", "GET", requestBody));
+            const response = (yield this.request('/api/2.1/jobs/runs/get', 'GET', requestBody));
             const taskRunId = response.tasks[0].run_id;
-            const terminalStates = new Set(["TERMINATED", "SKIPPED", "INTERNAL_ERROR"]);
+            const terminalStates = new Set(['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR']);
             if (terminalStates.has(response.state.life_cycle_state)) {
-                if (response.state.result_state === "SUCCESS") {
-                    const outputResponse = (yield this.request("/api/2.1/jobs/runs/get-output", "GET", { run_id: taskRunId }));
+                if (response.state.result_state === 'SUCCESS') {
+                    const outputResponse = (yield this.request('/api/2.1/jobs/runs/get-output', 'GET', { run_id: taskRunId }));
                     return {
                         runId: runId,
                         runUrl: outputResponse.metadata.run_page_url,
                         notebookOutput: {
                             result: outputResponse.notebook_output.result,
-                            truncated: outputResponse.notebook_output.truncated,
-                        },
+                            truncated: outputResponse.notebook_output.truncated
+                        }
                     };
                 }
                 else {
@@ -72,30 +72,30 @@ class ApiClient {
                 }
             }
             else {
-                yield new Promise((f) => setTimeout(f, constants_1.GET_JOB_STATUS_POLL_INTERVAL_SECS * 1000));
+                yield new Promise(f => setTimeout(f, constants_1.GET_JOB_STATUS_POLL_INTERVAL_SECS * 1000));
                 return yield this.awaitJobAndGetOutput(runId);
             }
         });
     }
     deleteDirectory(path) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.request("/api/2.0/workspace/delete", "POST", {
+            yield this.request('/api/2.0/workspace/delete', 'POST', {
                 path,
-                recursive: true,
+                recursive: true
             });
         });
     }
     workspaceMkdirs(path) {
         return __awaiter(this, void 0, void 0, function* () {
             const requestBody = {
-                path,
+                path
             };
-            yield this.request("/api/2.0/workspace/mkdirs", "POST", requestBody);
+            yield this.request('/api/2.0/workspace/mkdirs', 'POST', requestBody);
         });
     }
     readNotebookContents(path) {
         try {
-            return (0, fs_1.readFileSync)(path, "utf8");
+            return (0, fs_1.readFileSync)(path, 'utf8');
         }
         catch (error) {
             throw new Error(`Failed to read contents of notebook at local filesystem path ${path}. Original error:\n${error}`);
@@ -104,26 +104,26 @@ class ApiClient {
     importNotebook(srcPath, dstPath) {
         return __awaiter(this, void 0, void 0, function* () {
             const fileContents = this.readNotebookContents(srcPath);
-            const base64FileContents = new buffer_1.Buffer(fileContents).toString("base64");
+            const base64FileContents = new buffer_1.Buffer(fileContents).toString('base64');
             const fileSuffix = (0, path_1.extname)(srcPath).toLowerCase();
-            let format = "SOURCE";
+            let format = 'SOURCE';
             let language;
             switch (fileSuffix) {
-                case ".py":
-                    language = "PYTHON";
+                case '.py':
+                    language = 'PYTHON';
                     break;
-                case ".ipynb":
-                    format = "JUPYTER";
-                    language = "PYTHON";
+                case '.ipynb':
+                    format = 'JUPYTER';
+                    language = 'PYTHON';
                     break;
-                case ".scala":
-                    language = "SCALA";
+                case '.scala':
+                    language = 'SCALA';
                     break;
-                case ".r":
-                    language = "R";
+                case '.r':
+                    language = 'R';
                     break;
-                case ".sql":
-                    language = "SQL";
+                case '.sql':
+                    language = 'SQL';
                     break;
                 default:
                     throw new Error(`Cannot run notebook ${srcPath} with unsupported file extension ${fileSuffix}. Supported file extensions are .py, .ipynb, .scala, .R, and .sql`);
@@ -132,9 +132,9 @@ class ApiClient {
                 path: dstPath,
                 content: base64FileContents,
                 format,
-                language,
+                language
             };
-            yield this.request("/api/2.0/workspace/import", "POST", requestBody);
+            yield this.request('/api/2.0/workspace/import', 'POST', requestBody);
         });
     }
 }
@@ -151,12 +151,12 @@ exports.ApiClient = ApiClient;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DATABRICKS_OUTPUT_TRUNCATED_KEY = exports.DATABRICKS_RUN_URL_KEY = exports.DATABRICKS_RUN_ID_KEY = exports.DATABRICKS_RUN_NOTEBOOK_OUTPUT_KEY = exports.DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY = exports.JOB_RUN_TASK_KEY = exports.GET_JOB_STATUS_POLL_INTERVAL_SECS = void 0;
 exports.GET_JOB_STATUS_POLL_INTERVAL_SECS = 5;
-exports.JOB_RUN_TASK_KEY = "notebook-task";
-exports.DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY = "__DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR";
-exports.DATABRICKS_RUN_NOTEBOOK_OUTPUT_KEY = "notebook-output";
-exports.DATABRICKS_RUN_ID_KEY = "run-id";
-exports.DATABRICKS_RUN_URL_KEY = "run-url";
-exports.DATABRICKS_OUTPUT_TRUNCATED_KEY = "truncated";
+exports.JOB_RUN_TASK_KEY = 'notebook-task';
+exports.DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY = '__DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR';
+exports.DATABRICKS_RUN_NOTEBOOK_OUTPUT_KEY = 'notebook-output';
+exports.DATABRICKS_RUN_ID_KEY = 'run-id';
+exports.DATABRICKS_RUN_URL_KEY = 'run-url';
+exports.DATABRICKS_OUTPUT_TRUNCATED_KEY = 'truncated';
 
 
 /***/ }),
@@ -185,26 +185,26 @@ const https_1 = __importDefault(__nccwpck_require__(211));
 const httpRequest = (baseUrl, path, method, headers, reqBody) => __awaiter(void 0, void 0, void 0, function* () {
     const hostname = new URL(baseUrl).host;
     const requestBody = JSON.stringify(reqBody);
-    headers["Content-Type"] = headers["Content-Type"]
-        ? headers["Content-Type"]
-        : "application/json";
-    headers["Content-Length"] = Buffer.byteLength(requestBody);
+    headers['Content-Type'] = headers['Content-Type']
+        ? headers['Content-Type']
+        : 'application/json';
+    headers['Content-Length'] = Buffer.byteLength(requestBody);
     const options = {
         hostname,
         path,
         method,
-        headers,
+        headers
     };
     return new Promise((resolve, reject) => {
-        let result = "";
-        const req = https_1.default.request(options, (res) => {
-            res.on("data", (chunk) => {
+        let result = '';
+        const req = https_1.default.request(options, res => {
+            res.on('data', chunk => {
                 result += chunk;
             });
-            res.on("error", (err) => {
+            res.on('error', err => {
                 reject(err);
             });
-            res.on("end", () => {
+            res.on('end', () => {
                 try {
                     if (res.statusCode === 200) {
                         resolve(JSON.parse(result));
@@ -218,7 +218,7 @@ const httpRequest = (baseUrl, path, method, headers, reqBody) => __awaiter(void 
                 }
             });
         });
-        req.on("error", (err) => {
+        req.on('error', err => {
             reject(err);
         });
         if (reqBody) {
@@ -270,10 +270,10 @@ exports.runStepAndHandleFailure = exports.isGitRefSpecified = exports.getGitSour
 const core = __importStar(__nccwpck_require__(186));
 const path_1 = __nccwpck_require__(622);
 const getDatabricksHost = () => {
-    const hostFromInput = core.getInput("databricks-host");
-    const hostFromEnv = process.env["DATABRICKS_HOST"] || "";
+    const hostFromInput = core.getInput('databricks-host');
+    const hostFromEnv = process.env['DATABRICKS_HOST'] || '';
     if (!hostFromInput && !hostFromEnv) {
-        throw new Error("Either databricks-host action input or DATABRICKS_HOST env variable must be set.");
+        throw new Error('Either databricks-host action input or DATABRICKS_HOST env variable must be set.');
     }
     else {
         // Host passed as an action input takes president.
@@ -282,18 +282,18 @@ const getDatabricksHost = () => {
 };
 exports.getDatabricksHost = getDatabricksHost;
 const getWorkspaceTempDir = () => {
-    const res = core.getInput("workspace-temp-dir");
-    if (!res.startsWith("/")) {
+    const res = core.getInput('workspace-temp-dir');
+    if (!res.startsWith('/')) {
         throw new Error(`workspace-temp-dir input must be an absolute Databricks workspace path. Got invalid path ${res}`);
     }
     return res;
 };
 exports.getWorkspaceTempDir = getWorkspaceTempDir;
 const getDatabricksToken = () => {
-    const tokenFromInput = core.getInput("databricks-token");
-    const tokenFromEnv = process.env["DATABRICKS_TOKEN"] || "";
+    const tokenFromInput = core.getInput('databricks-token');
+    const tokenFromEnv = process.env['DATABRICKS_TOKEN'] || '';
     if (!tokenFromInput && !tokenFromEnv) {
-        throw new Error("Either databricks-token action input or DATABRICKS_TOKEN env variable must be set.");
+        throw new Error('Either databricks-token action input or DATABRICKS_TOKEN env variable must be set.');
     }
     else {
         // Token passed as an action input takes president.
@@ -302,13 +302,13 @@ const getDatabricksToken = () => {
 };
 exports.getDatabricksToken = getDatabricksToken;
 const getNotebookPath = () => {
-    const localNotebookPath = core.getInput("local-notebook-path");
-    const workspaceNotebookPath = core.getInput("workspace-notebook-path");
+    const localNotebookPath = core.getInput('local-notebook-path');
+    const workspaceNotebookPath = core.getInput('workspace-notebook-path');
     if (!localNotebookPath && !workspaceNotebookPath) {
-        throw new Error("Either `local-notebook-path` or `workspace-notebook-path` inputs must be set.");
+        throw new Error('Either `local-notebook-path` or `workspace-notebook-path` inputs must be set.');
     }
     else if (localNotebookPath && workspaceNotebookPath) {
-        throw new Error("Only one of `local-notebook-path` and `workspace-notebook-path` must be set, not both.");
+        throw new Error('Only one of `local-notebook-path` and `workspace-notebook-path` must be set, not both.');
     }
     else if (localNotebookPath) {
         if ((0, path_1.isAbsolute)(localNotebookPath)) {
@@ -325,13 +325,13 @@ const getNotebookPath = () => {
 };
 exports.getNotebookPath = getNotebookPath;
 const getClusterSpec = () => {
-    const existingClusterId = core.getInput("existing-cluster-id");
-    const newClusterJsonString = core.getInput("new-cluster-json");
+    const existingClusterId = core.getInput('existing-cluster-id');
+    const newClusterJsonString = core.getInput('new-cluster-json');
     if (!newClusterJsonString && !existingClusterId) {
-        throw new Error("Either `existing-cluster-id` or `new-cluster-json` inputs must be set.");
+        throw new Error('Either `existing-cluster-id` or `new-cluster-json` inputs must be set.');
     }
     else if (newClusterJsonString && existingClusterId) {
-        throw new Error("Only one of `existing-cluster-id` and `new-cluster-json` must be set, not both.");
+        throw new Error('Only one of `existing-cluster-id` and `new-cluster-json` must be set, not both.');
     }
     else if (newClusterJsonString) {
         const newClusterSpec = JSON.parse(newClusterJsonString);
@@ -343,56 +343,56 @@ const getClusterSpec = () => {
 };
 exports.getClusterSpec = getClusterSpec;
 const getLibrariesSpec = () => {
-    const librariesJsonString = core.getInput("libraries-json");
+    const librariesJsonString = core.getInput('libraries-json');
     return librariesJsonString
         ? {
-            libraries: JSON.parse(librariesJsonString),
+            libraries: JSON.parse(librariesJsonString)
         }
         : {};
 };
 exports.getLibrariesSpec = getLibrariesSpec;
 const getNotebookParamsSpec = () => {
-    const paramsJsonString = core.getInput("notebook-params-json");
+    const paramsJsonString = core.getInput('notebook-params-json');
     return paramsJsonString
         ? {
-            base_parameters: JSON.parse(paramsJsonString),
+            base_parameters: JSON.parse(paramsJsonString)
         }
         : {};
 };
 exports.getNotebookParamsSpec = getNotebookParamsSpec;
 const getAclSpec = () => {
-    const aclJsonString = core.getInput("access-control-list-json");
+    const aclJsonString = core.getInput('access-control-list-json');
     return aclJsonString
         ? {
-            access_control_list: JSON.parse(aclJsonString),
+            access_control_list: JSON.parse(aclJsonString)
         }
         : {};
 };
 exports.getAclSpec = getAclSpec;
 const getTimeoutSpec = () => {
-    const timeoutInSeconds = core.getInput("timeout-seconds");
+    const timeoutInSeconds = core.getInput('timeout-seconds');
     return timeoutInSeconds
         ? {
-            timeout_seconds: Number(timeoutInSeconds),
+            timeout_seconds: Number(timeoutInSeconds)
         }
         : {};
 };
 exports.getTimeoutSpec = getTimeoutSpec;
 const getRunNameSpec = () => {
-    const runName = core.getInput("run-name");
+    const runName = core.getInput('run-name');
     return runName
         ? {
-            run_name: runName,
+            run_name: runName
         }
         : {};
 };
 exports.getRunNameSpec = getRunNameSpec;
 const getGitSourceSpec = () => {
-    const gitBranch = core.getInput("git-branch");
-    const gitTag = core.getInput("git-tag");
-    const gitCommit = core.getInput("git-commit");
-    const githubServerUrl = process.env["GITHUB_SERVER_URL"] || "";
-    const githubRepo = process.env["GITHUB_REPOSITORY"] || "";
+    const gitBranch = core.getInput('git-branch');
+    const gitTag = core.getInput('git-tag');
+    const gitCommit = core.getInput('git-commit');
+    const githubServerUrl = process.env['GITHUB_SERVER_URL'] || '';
+    const githubRepo = process.env['GITHUB_REPOSITORY'] || '';
     const gitSource = `${githubServerUrl}/${githubRepo}`;
     if (!(0, exports.isGitRefSpecified)()) {
         return {};
@@ -400,34 +400,34 @@ const getGitSourceSpec = () => {
     else if (gitBranch && !gitTag && !gitCommit) {
         return {
             git_source: gitSource,
-            git_provider: "github",
-            git_branch: gitBranch,
+            git_provider: 'github',
+            git_branch: gitBranch
         };
     }
     else if (gitTag && !gitBranch && !gitCommit) {
         return {
             git_source: gitSource,
-            git_provider: "github",
-            git_tag: gitTag,
+            git_provider: 'github',
+            git_tag: gitTag
         };
     }
     else if (gitCommit && !gitBranch && !gitTag) {
         return {
             git_source: gitSource,
-            git_provider: "github",
-            git_commit: gitCommit,
+            git_provider: 'github',
+            git_commit: gitCommit
         };
     }
     else {
-        throw new Error("Only one of `git-branch`, `git-tag`, or `git-commit` must be set, not more.");
+        throw new Error('Only one of `git-branch`, `git-tag`, or `git-commit` must be set, not more.');
     }
 };
 exports.getGitSourceSpec = getGitSourceSpec;
 const isGitRefSpecified = () => {
-    const gitBranch = core.getInput("git-branch");
-    const gitTag = core.getInput("git-tag");
-    const gitCommit = core.getInput("git-commit");
-    return gitBranch !== "" || gitTag !== "" || gitCommit !== "";
+    const gitBranch = core.getInput('git-branch');
+    const gitTag = core.getInput('git-tag');
+    const gitCommit = core.getInput('git-commit');
+    return gitBranch !== '' || gitTag !== '' || gitCommit !== '';
 };
 exports.isGitRefSpecified = isGitRefSpecified;
 const runStepAndHandleFailure = (runStep) => __awaiter(void 0, void 0, void 0, function* () {
@@ -515,7 +515,7 @@ function runPostHelper() {
     return __awaiter(this, void 0, void 0, function* () {
         const tmpNotebookDirectory = core.getState(constants_1.DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY);
         if (tmpNotebookDirectory) {
-            yield (0, delete_tmp_notebook_1.deleteTmpNotebooks)(core.getInput("databricks-host"), core.getInput("databricks-token"), tmpNotebookDirectory);
+            yield (0, delete_tmp_notebook_1.deleteTmpNotebooks)(core.getInput('databricks-host'), core.getInput('databricks-token'), tmpNotebookDirectory);
         }
     });
 }
