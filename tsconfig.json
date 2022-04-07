@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig-base.json",
+  "references": [
+    {
+      "path": "./packages/main"
+    },
+    {
+      "path": "./packages/post"
+    },
+    {
+      "path": "./packages/common"
+    }
+  ]
+}
