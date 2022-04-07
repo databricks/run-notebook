@@ -17,7 +17,7 @@ export const getDatabricksHost = (): string => {
 
 export const getWorkspaceTempDir = (): string => {
   const res = core.getInput('workspace-temp-dir')
-  if (!res.startsWith('/') && !isGitRefSpecified()) {
+  if (!res.startsWith('/')) {
     throw new Error(
       `workspace-temp-dir input must be an absolute Databricks workspace path. Got invalid path ${res}`
     )

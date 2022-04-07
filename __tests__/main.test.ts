@@ -51,6 +51,11 @@ describe(`main's runner integration tests`, () => {
   const workspaceTmpdir = '/databricks-github-actions'
   const expectedNotebookUploadPath = `${workspaceTmpdir}/${mockUuid}/python-notebook.py`
 
+  beforeEach(() => {
+    //Set the default value from action.yml
+    process.env['INPUT_WORKSPACE-TEMP-DIR'] = '/tmp/databricks-github-actions'
+  })
+
   afterEach(() => {
     delete process.env['INPUT_NOTEBOOK-PATH']
     delete process.env['INPUT_WORKSPACE-TEMP-DIR']
