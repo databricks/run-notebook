@@ -153,7 +153,7 @@ inputs:
       files within the same repo (e.g imports Python modules within the same repo) or
       that was developed using [Databricks Repos]
       (https://docs.databricks.com/repos/index.html).
-   required: false
+    required: false
   git-tag:
     description: >
       Note: this optional parameter is currently in private preview. Contact Databricks Support
