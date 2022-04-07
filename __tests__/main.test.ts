@@ -51,6 +51,11 @@ describe(`main's runner integration tests`, () => {
   const workspaceTmpdir = '/databricks-github-actions'
   const expectedNotebookUploadPath = `${workspaceTmpdir}/${mockUuid}/python-notebook.py`
 
+  beforeEach(() => {
+    // Respect the default input values defined in action.yml.
+    process.env['INPUT_WORKSPACE-TEMP-DIR'] = '/tmp/databricks-github-actions'
+  })
+
   afterEach(() => {
     delete process.env['INPUT_NOTEBOOK-PATH']
     delete process.env['INPUT_WORKSPACE-TEMP-DIR']
@@ -65,6 +70,9 @@ describe(`main's runner integration tests`, () => {
     delete process.env['INPUT_DATABRICKS-TOKEN']
     delete process.env['INPUT_LOCAL-NOTEBOOK-PATH']
     delete process.env['INPUT_WORKSPACE-NOTEBOOK-PATH']
+    delete process.env['INPUT_GIT-COMMIT']
+    delete process.env['GITHUB_SERVER_URL']
+    delete process.env['GITHUB_REPOSITORY']
     jest.restoreAllMocks()
   })
 
@@ -207,6 +215,147 @@ describe(`main's runner integration tests`, () => {
     await runMain()
     const apiMock = getRequestMock()
     expect(apiMock).toBeCalledTimes(5)
+    expect(getSetOutputMock()).toBeCalledWith(
+      DATABRICKS_RUN_NOTEBOOK_OUTPUT_KEY,
+      'My output'
+    )
+    expect(getSetOutputMock()).toBeCalledWith(
+      DATABRICKS_OUTPUT_TRUNCATED_KEY,
+      false
+    )
+    expect(getSetOutputMock()).toBeCalledWith(DATABRICKS_RUN_ID_KEY, dummyRunId)
+    expect(getSetOutputMock()).toBeCalledWith(
+      DATABRICKS_RUN_URL_KEY,
+      dummyRunUrl
+    )
+  })
+
+  test('reads all optional inputs with git-ref, runs notebook, and sets output', async () => {
+    const notebookPath = '__tests__/resources/python-notebook.py'
+    const dummyGitRepoName = 'dummyOwner/dummyRepo'
+    const dummyGitServerUrl = 'github.com'
+    const dummyGitCommit = 'sha1234'
+    const expectedRunName = 'My python-notebook run'
+    const dummyRunId = 123
+    const dummyTaskRunId = 456
+    const dummyRunUrl = 'databricks.com/url/to/job/run/'
+    const expectedGitSourceSpec = {
+      git_url: `${dummyGitServerUrl}/${dummyGitRepoName}`,
+      git_provider: 'github',
+      git_commit: dummyGitCommit
+    }
+    const expectedParamsSpec = {
+      param1: 'val1',
+      param2: 2
+    }
+    const expectedAclSpec = [
+      {
+        user_name: 'jsmith@example.com',
+        permission_level: 'CAN_MANAGE'
+      },
+      {
+        user_name: 'john.doe@example.com',
+        permission_level: 'CAN_EDIT'
+      }
+    ]
+    const expectedlibrariesSpec = [
+      {
+        jar: 'dbfs:/my-jar.jar',
+        whl: 'dbfs:/my/whl',
+        pypi: {
+          package: 'simplejson==3.8.0',
+          repo: 'https://my-repo.com'
+        }
+      }
+    ]
+    const expectedNewClusterSpec = {
+      num_workers: 0,
+      autoscale: {
+        min_workers: 0,
+        max_workers: 0
+      }
+    }
+    const expectedTimeout = 540
+
+    const expectedRequestWithAllInputSpecs = {
+      tasks: [
+        {
+          task_key: JOB_RUN_TASK_KEY,
+          notebook_task: {
+            base_parameters: expectedParamsSpec,
+            notebook_path: notebookPath
+          },
+          new_cluster: expectedNewClusterSpec,
+          libraries: expectedlibrariesSpec
+        }
+      ],
+      run_name: expectedRunName,
+      access_control_list: expectedAclSpec,
+      timeout_seconds: expectedTimeout,
+      git_source: expectedGitSourceSpec
+    }
+    process.env['INPUT_NOTEBOOK-PARAMS-JSON'] =
+      JSON.stringify(expectedParamsSpec)
+    process.env['INPUT_ACCESS-CONTROL-LIST-JSON'] =
+      JSON.stringify(expectedAclSpec)
+    process.env['INPUT_LIBRARIES-JSON'] = JSON.stringify(expectedlibrariesSpec)
+    process.env['INPUT_NEW-CLUSTER-JSON'] = JSON.stringify(
+      expectedNewClusterSpec
+    )
+    process.env['INPUT_TIMEOUT-SECONDS'] = String(expectedTimeout)
+    process.env['INPUT_RUN-NAME'] = expectedRunName
+    process.env['INPUT_DATABRICKS-HOST'] = DATABRICKS_HOST
+    process.env['INPUT_DATABRICKS-TOKEN'] = TOKEN
+    process.env['INPUT_LOCAL-NOTEBOOK-PATH'] = notebookPath
+    process.env['INPUT_GIT-COMMIT'] = dummyGitCommit
+
+    process.env['INPUT_DATABRICKS-HOST'] = DATABRICKS_HOST
+    process.env['INPUT_DATABRICKS-TOKEN'] = TOKEN
+    process.env['GITHUB_SERVER_URL'] = dummyGitServerUrl
+    process.env['GITHUB_REPOSITORY'] = dummyGitRepoName
+
+    setupExpectedApiCalls([
+      mockApiRequest(
+        '/api/2.1/jobs/runs/submit',
+        'POST',
+        expectedRequestWithAllInputSpecs,
+        200,
+        {run_id: dummyRunId}
+      ),
+      mockApiRequest(
+        '/api/2.1/jobs/runs/get',
+        'GET',
+        {run_id: dummyRunId},
+        200,
+        {
+          state: {
+            life_cycle_state: 'TERMINATED',
+            result_state: 'SUCCESS',
+            state_message: 'Run succeeded'
+          },
+          tasks: [{run_id: dummyTaskRunId}]
+        }
+      ),
+      mockApiRequest(
+        '/api/2.1/jobs/runs/get-output',
+        'GET',
+        {run_id: dummyTaskRunId},
+        200,
+        {
+          notebook_output: {
+            result: 'My output',
+            truncated: false
+          },
+          metadata: {
+            run_page_url: dummyRunUrl
+          }
+        }
+      )
+    ])
+
+    await runMain()
+    const apiMock = getRequestMock()
+    expect(apiMock).toBeCalledTimes(3)
     expect(getSetOutputMock()).toBeCalledWith(
       DATABRICKS_RUN_NOTEBOOK_OUTPUT_KEY,
       'My output'

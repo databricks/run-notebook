@@ -393,29 +393,26 @@ const getGitSourceSpec = () => {
     const gitCommit = core.getInput('git-commit');
     const githubServerUrl = process.env['GITHUB_SERVER_URL'] || '';
     const githubRepo = process.env['GITHUB_REPOSITORY'] || '';
-    const gitSource = `${githubServerUrl}/${githubRepo}`;
+    const baseGitSourceSpec = {
+        git_url: `${githubServerUrl}/${githubRepo}`,
+        git_provider: 'github'
+    };
     if (!(0, exports.isGitRefSpecified)()) {
         return {};
     }
     else if (gitBranch && !gitTag && !gitCommit) {
         return {
-            git_source: gitSource,
-            git_provider: 'github',
-            git_branch: gitBranch
+            git_source: Object.assign(Object.assign({}, baseGitSourceSpec), { git_branch: gitBranch })
         };
     }
     else if (gitTag && !gitBranch && !gitCommit) {
         return {
-            git_source: gitSource,
-            git_provider: 'github',
-            git_tag: gitTag
+            git_source: Object.assign(Object.assign({}, baseGitSourceSpec), { git_tag: gitTag })
         };
     }
     else if (gitCommit && !gitBranch && !gitTag) {
         return {
-            git_source: gitSource,
-            git_provider: 'github',
-            git_commit: gitCommit
+            git_source: Object.assign(Object.assign({}, baseGitSourceSpec), { git_commit: gitCommit })
         };
     }
     else {

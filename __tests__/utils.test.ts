@@ -305,8 +305,8 @@ describe(`input utils`, () => {
 
   describe(`getGitSourceSpec`, () => {
     beforeEach(() => {
-      process.env['GITHUB_SERVER_URL'] = 'my.url'
-      process.env['GITHUB_REPOSITORY'] = 'repo'
+      process.env['GITHUB_SERVER_URL'] = 'https://my-git.com'
+      process.env['GITHUB_REPOSITORY'] = 'dummyOwner/dummyRepo'
     })
     afterEach(() => {
       delete process.env['INPUT_GIT-BRANCH']
@@ -334,9 +334,11 @@ describe(`input utils`, () => {
       var expectedTag = 'my-tag'
       process.env['INPUT_GIT-TAG'] = expectedTag
       expect(utils.getGitSourceSpec()).toEqual({
-        git_tag: expectedTag,
-        git_source: 'my.url/repo',
-        git_provider: 'github'
+        git_source: {
+          git_tag: expectedTag,
+          git_url: 'https://my-git.com/dummyOwner/dummyRepo',
+          git_provider: 'github'
+        }
       })
     })
 
@@ -344,9 +346,11 @@ describe(`input utils`, () => {
       var expectedBranch = 'my-branch'
       process.env['INPUT_GIT-BRANCH'] = expectedBranch
       expect(utils.getGitSourceSpec()).toEqual({
-        git_branch: expectedBranch,
-        git_source: 'my.url/repo',
-        git_provider: 'github'
+        git_source: {
+          git_branch: expectedBranch,
+          git_url: 'https://my-git.com/dummyOwner/dummyRepo',
+          git_provider: 'github'
+        }
       })
     })
 
@@ -354,9 +358,11 @@ describe(`input utils`, () => {
       var expectedCommit = 'my-commit'
       process.env['INPUT_GIT-COMMIT'] = expectedCommit
       expect(utils.getGitSourceSpec()).toEqual({
-        git_commit: expectedCommit,
-        git_source: 'my.url/repo',
-        git_provider: 'github'
+        git_source: {
+          git_commit: expectedCommit,
+          git_url: 'https://my-git.com/dummyOwner/dummyRepo',
+          git_provider: 'github'
+        }
       })
     })
 
