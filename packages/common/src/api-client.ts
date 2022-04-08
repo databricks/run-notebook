@@ -84,7 +84,7 @@ export class ApiClient {
       tasks: {run_id: string}[]
     }
 
-    logJobRunUrl(response.run_page_url)
+    logJobRunUrl(response.run_page_url, response.state.life_cycle_state)
 
     const taskRunId = response.tasks[0].run_id
     const terminalStates = new Set(['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR'])

@@ -206,6 +206,6 @@ export const debugLogging = (logStatement: string): void => {
   }
 }
 
-export const logJobRunUrl = (jobRunUrl: string): void => {
-  core.info(`The notebook run url is: ${jobRunUrl}`)
+export const logJobRunUrl = (jobRunUrl: string, jobRunStatus: string): void => {
+  core.info(`Notebook run has status ${jobRunStatus}. URL: ${jobRunUrl}`)
 }
