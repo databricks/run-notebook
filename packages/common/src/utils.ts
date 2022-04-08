@@ -57,7 +57,13 @@ export const getNotebookPath = (): string => {
         `'local-notebook-path' input must be a relative path, instead recieved: ${localNotebookPath}`
       )
     }
-    return localNotebookPath
+
+    if (isGitRefSpecified()) {
+      // Strip the file extension from the notebook path.
+      return localNotebookPath.split('.').slice(0, -1).join('.')
+    } else {
+      return localNotebookPath
+    }
   } else {
     if (!isAbsolute(workspaceNotebookPath)) {
       throw new Error(
@@ -192,4 +198,14 @@ export const runStepAndHandleFailure = async (
     }
     throw error
   }
+}
+
+export const debugLogging = (logStatement: string): void => {
+  if (core.isDebug()) {
+    core.debug(logStatement)
+  }
+}
+
+export const logJobRunUrl = (jobRunUrl: string): void => {
+  core.info(`The notebook run url is: ${jobRunUrl}`)
 }

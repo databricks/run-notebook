@@ -342,6 +342,13 @@ jobs:
 
 ```
 
+# Troubleshooting
+In order to be able to debug run-notebook failures 
+such as inspecting `runs/submit` payload,
+then please set `ACTIONS_STEP_DEBUG` action secret to `true`. 
+See [Step Debug Logs](https://github.com/actions/toolkit/blob/master/docs/action-debugging.md#how-to-access-step-debug-logs) 
+for further details.
+
 # License
 
 The scripts and documentation in this project are released under the [Apache License, Version 2.0](LICENSE).

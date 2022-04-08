@@ -1,12 +1,10 @@
 import {
   DATABRICKS_HOST,
   TOKEN,
-  getGetStateMock,
   getRequestMock,
   getSetOutputMock,
   mockApiRequest,
-  setupExpectedApiCalls,
-  getSaveStateMock
+  setupExpectedApiCalls
 } from './test-utils'
 import {runMain} from '../packages/main/src/run-main'
 import {
@@ -232,6 +230,7 @@ describe(`main's runner integration tests`, () => {
 
   test('reads all optional inputs with git-ref, runs notebook, and sets output', async () => {
     const notebookPath = '__tests__/resources/python-notebook.py'
+    const expectedNotebookPath = '__tests__/resources/python-notebook'
     const dummyGitRepoName = 'dummyOwner/dummyRepo'
     const dummyGitServerUrl = 'github.com'
     const dummyGitCommit = 'sha1234'
@@ -283,7 +282,7 @@ describe(`main's runner integration tests`, () => {
           task_key: JOB_RUN_TASK_KEY,
           notebook_task: {
             base_parameters: expectedParamsSpec,
-            notebook_path: notebookPath
+            notebook_path: expectedNotebookPath
           },
           new_cluster: expectedNewClusterSpec,
           libraries: expectedlibrariesSpec

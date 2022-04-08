@@ -1,9 +1,10 @@
-import {Buffer} from 'buffer'
 import {GET_JOB_STATUS_POLL_INTERVAL_SECS, JOB_RUN_TASK_KEY} from './constants'
+import {debugLogging, logJobRunUrl} from './utils'
+import {Buffer} from 'buffer'
+import {JobRunOutput} from './interfaces'
 import {extname} from 'path'
 import {httpRequest} from './request'
 import {readFileSync} from 'fs'
-import {JobRunOutput} from './interfaces'
 
 // Copying from https://github.com/databricks/databricks-cli/blob/1e39ccfdbab47ee2ca7f320b81146e2bcabb2f97/databricks_cli/sdk/api_client.py
 export class ApiClient {
@@ -55,6 +56,10 @@ export class ApiClient {
       ...gitSourceSpec
     }
 
+    debugLogging(
+      `The job spec input to runs/submit is: ${JSON.stringify(requestBody)}`
+    )
+
     const response = (await this.request(
       '/api/2.1/jobs/runs/submit',
       'POST',
@@ -63,7 +68,10 @@ export class ApiClient {
     return response.run_id
   }
 
-  async awaitJobAndGetOutput(runId: number): Promise<JobRunOutput> {
+  async awaitJobAndGetOutput(
+    runId: number,
+    shouldLogJobRunUrl = true
+  ): Promise<JobRunOutput> {
     const requestBody = {run_id: runId}
     const response = (await this.request(
       '/api/2.1/jobs/runs/get',
@@ -77,6 +85,10 @@ export class ApiClient {
       }
       run_page_url: string
       tasks: {run_id: string}[]
+    }
+
+    if (shouldLogJobRunUrl) {
+      logJobRunUrl(response.run_page_url)
     }
 
     const taskRunId = response.tasks[0].run_id
@@ -97,7 +109,7 @@ export class ApiClient {
           }
         }
         return {
-          runId: runId,
+          runId,
           runUrl: outputResponse.metadata.run_page_url,
           notebookOutput: {
             result: outputResponse.notebook_output.result,
@@ -113,7 +125,7 @@ export class ApiClient {
       await new Promise(f =>
         setTimeout(f, GET_JOB_STATUS_POLL_INTERVAL_SECS * 1000)
       )
-      return await this.awaitJobAndGetOutput(runId)
+      return await this.awaitJobAndGetOutput(runId, false)
     }
   }
 

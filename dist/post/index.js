@@ -17,8 +17,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiClient = void 0;
-const buffer_1 = __nccwpck_require__(293);
 const constants_1 = __nccwpck_require__(360);
+const utils_1 = __nccwpck_require__(494);
+const buffer_1 = __nccwpck_require__(293);
 const path_1 = __nccwpck_require__(622);
 const request_1 = __nccwpck_require__(1);
 const fs_1 = __nccwpck_require__(747);
@@ -45,21 +46,25 @@ class ApiClient {
             const requestBody = Object.assign(Object.assign(Object.assign(Object.assign({ tasks: [
                     Object.assign(Object.assign({ task_key: constants_1.JOB_RUN_TASK_KEY, notebook_task: Object.assign({ notebook_path: path }, paramsSpec) }, clusterSpec), librariesSpec)
                 ] }, aclListSpec), timeoutSpec), runNameSpec), gitSourceSpec);
+            (0, utils_1.debugLogging)(`The job spec input to runs/submit is: ${JSON.stringify(requestBody)}`);
             const response = (yield this.request('/api/2.1/jobs/runs/submit', 'POST', requestBody));
             return response.run_id;
         });
     }
-    awaitJobAndGetOutput(runId) {
+    awaitJobAndGetOutput(runId, shouldLogJobRunUrl = true) {
         return __awaiter(this, void 0, void 0, function* () {
             const requestBody = { run_id: runId };
             const response = (yield this.request('/api/2.1/jobs/runs/get', 'GET', requestBody));
+            if (shouldLogJobRunUrl) {
+                (0, utils_1.logJobRunUrl)(response.run_page_url);
+            }
             const taskRunId = response.tasks[0].run_id;
             const terminalStates = new Set(['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR']);
             if (terminalStates.has(response.state.life_cycle_state)) {
                 if (response.state.result_state === 'SUCCESS') {
                     const outputResponse = (yield this.request('/api/2.1/jobs/runs/get-output', 'GET', { run_id: taskRunId }));
                     return {
-                        runId: runId,
+                        runId,
                         runUrl: outputResponse.metadata.run_page_url,
                         notebookOutput: {
                             result: outputResponse.notebook_output.result,
@@ -73,7 +78,7 @@ class ApiClient {
             }
             else {
                 yield new Promise(f => setTimeout(f, constants_1.GET_JOB_STATUS_POLL_INTERVAL_SECS * 1000));
-                return yield this.awaitJobAndGetOutput(runId);
+                return yield this.awaitJobAndGetOutput(runId, false);
             }
         });
     }
@@ -266,7 +271,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.runStepAndHandleFailure = exports.isGitRefSpecified = exports.getGitSourceSpec = exports.getRunNameSpec = exports.getTimeoutSpec = exports.getAclSpec = exports.getNotebookParamsSpec = exports.getLibrariesSpec = exports.getClusterSpec = exports.getNotebookPath = exports.getDatabricksToken = exports.getWorkspaceTempDir = exports.getDatabricksHost = void 0;
+exports.logJobRunUrl = exports.debugLogging = exports.runStepAndHandleFailure = exports.isGitRefSpecified = exports.getGitSourceSpec = exports.getRunNameSpec = exports.getTimeoutSpec = exports.getAclSpec = exports.getNotebookParamsSpec = exports.getLibrariesSpec = exports.getClusterSpec = exports.getNotebookPath = exports.getDatabricksToken = exports.getWorkspaceTempDir = exports.getDatabricksHost = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const path_1 = __nccwpck_require__(622);
 const getDatabricksHost = () => {
@@ -314,7 +319,13 @@ const getNotebookPath = () => {
         if ((0, path_1.isAbsolute)(localNotebookPath)) {
             throw new Error(`'local-notebook-path' input must be a relative path, instead recieved: ${localNotebookPath}`);
         }
-        return localNotebookPath;
+        if ((0, exports.isGitRefSpecified)()) {
+            // Strip the file extension from the notebook path.
+            return localNotebookPath.split('.').slice(0, -1).join('.');
+        }
+        else {
+            return localNotebookPath;
+        }
     }
     else {
         if (!(0, path_1.isAbsolute)(workspaceNotebookPath)) {
@@ -439,6 +450,16 @@ const runStepAndHandleFailure = (runStep) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.runStepAndHandleFailure = runStepAndHandleFailure;
+const debugLogging = (logStatement) => {
+    if (core.isDebug()) {
+        core.debug(logStatement);
+    }
+};
+exports.debugLogging = debugLogging;
+const logJobRunUrl = (jobRunUrl) => {
+    core.info(`The notebook run url is: ${jobRunUrl}`);
+};
+exports.logJobRunUrl = logJobRunUrl;
 
 
 /***/ }),
