@@ -435,8 +435,11 @@ describe('utils unit tests', () => {
 
   test('logJobRunUrl logs job run url', async () => {
     const myJobUrl = 'my-url.com/jobs/run/1234'
-    utils.logJobRunUrl(myJobUrl)
+    const jobStatus = 'PENDING'
+    utils.logJobRunUrl(myJobUrl, jobStatus)
 
-    expect(getInfoMock()).toBeCalledWith(`The notebook run url is: ${myJobUrl}`)
+    expect(getInfoMock()).toBeCalledWith(
+      `Notebook run has status PENDING. URL: ${myJobUrl}`
+    )
   })
 })

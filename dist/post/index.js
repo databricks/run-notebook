@@ -55,7 +55,7 @@ class ApiClient {
         return __awaiter(this, void 0, void 0, function* () {
             const requestBody = { run_id: runId };
             const response = (yield this.request('/api/2.1/jobs/runs/get', 'GET', requestBody));
-            (0, utils_1.logJobRunUrl)(response.run_page_url);
+            (0, utils_1.logJobRunUrl)(response.run_page_url, response.state.life_cycle_state);
             const taskRunId = response.tasks[0].run_id;
             const terminalStates = new Set(['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR']);
             if (terminalStates.has(response.state.life_cycle_state)) {
@@ -454,8 +454,8 @@ const debugLogging = (logStatement) => {
     }
 };
 exports.debugLogging = debugLogging;
-const logJobRunUrl = (jobRunUrl) => {
-    core.info(`The notebook run url is: ${jobRunUrl}`);
+const logJobRunUrl = (jobRunUrl, jobRunStatus) => {
+    core.info(`Notebook run has status ${jobRunStatus}. URL: ${jobRunUrl}`);
 };
 exports.logJobRunUrl = logJobRunUrl;
 

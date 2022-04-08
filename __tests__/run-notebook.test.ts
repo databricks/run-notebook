@@ -98,7 +98,9 @@ describe('run-notebook integration tests', () => {
     expect(apiMock).toBeCalledTimes(3)
     const infoMock = getInfoMock()
     expect(infoMock).toBeCalledTimes(1)
-    expect(infoMock).toBeCalledWith(`Notebook run has status TERMINATED: ${runPageUrl}`)
+    expect(infoMock).toBeCalledWith(
+      `Notebook run has status TERMINATED. URL: ${runPageUrl}`
+    )
   })
 
   test('all optional inputs from runAndAwaitNotebook are passed in correctly to request body of runs/submit', async () => {
@@ -274,9 +276,9 @@ describe('run-notebook integration tests', () => {
     // Expect job URL to be printed on each call to /runs/get
     const infoMock = getInfoMock()
     expect(infoMock.mock.calls).toEqual(
-      ['PENDING', 'RUNNING', 'RUNNING', 'TERMINATED'].map((runStatus) =>
-        [`Notebook run has status ${runStatus}. URL: ${runPageUrl}`]
-      )
+      ['PENDING', 'RUNNING', 'RUNNING', 'TERMINATED'].map(runStatus => [
+        `Notebook run has status ${runStatus}. URL: ${runPageUrl}`
+      ])
     )
   })
 
