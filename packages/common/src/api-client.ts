@@ -1,20 +1,23 @@
-import {Buffer} from 'buffer'
 import {GET_JOB_STATUS_POLL_INTERVAL_SECS, JOB_RUN_TASK_KEY} from './constants'
+import {debugLogging, infoLogging} from './utils'
+import {Buffer} from 'buffer'
+import {JobRunOutput} from './interfaces'
 import {extname} from 'path'
 import {httpRequest} from './request'
 import {readFileSync} from 'fs'
-import {JobRunOutput} from './interfaces'
 
 // Copying from https://github.com/databricks/databricks-cli/blob/1e39ccfdbab47ee2ca7f320b81146e2bcabb2f97/databricks_cli/sdk/api_client.py
 export class ApiClient {
   host: string
   token: string
   actionVerson: string
+  urlHasBeenLogged: boolean
 
   constructor(host: string, token: string) {
     this.host = host
     this.token = token
     this.actionVerson = require('../../../package.json').version
+    this.urlHasBeenLogged = false
   }
 
   async request(path: string, method: string, body: object): Promise<object> {
@@ -55,6 +58,10 @@ export class ApiClient {
       ...gitSourceSpec
     }
 
+    debugLogging(
+      `The job spec input to runs/submit is: ${JSON.stringify(requestBody)}`
+    )
+
     const response = (await this.request(
       '/api/2.1/jobs/runs/submit',
       'POST',
@@ -79,6 +86,12 @@ export class ApiClient {
       tasks: {run_id: string}[]
     }
 
+    // Only log the run url once.
+    if (!this.urlHasBeenLogged) {
+      infoLogging(`The notebook run url is: ${response.run_page_url}`)
+      this.urlHasBeenLogged = true
+    }
+
     const taskRunId = response.tasks[0].run_id
     const terminalStates = new Set(['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR'])
     if (terminalStates.has(response.state.life_cycle_state)) {
@@ -97,7 +110,7 @@ export class ApiClient {
           }
         }
         return {
-          runId: runId,
+          runId,
           runUrl: outputResponse.metadata.run_page_url,
           notebookOutput: {
             result: outputResponse.notebook_output.result,

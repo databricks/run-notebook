@@ -1,13 +1,17 @@
 import * as utils from '../packages/common/src/utils'
 import {
-  getWorkspaceTempDir,
-  runStepAndHandleFailure
-} from '../packages/common/src/utils'
-import {getSetFailedMock} from './test-utils'
+  getDebugMock,
+  getInfoMock,
+  getIsDebugMock,
+  getSetFailedMock
+} from './test-utils'
 
 jest.mock('@actions/core', () => {
   return {
     ...jest.requireActual('@actions/core'),
+    debug: jest.fn(),
+    info: jest.fn(),
+    isDebug: jest.fn(),
     setFailed: jest.fn()
   }
 })
@@ -79,11 +83,20 @@ describe(`input utils`, () => {
     afterEach(() => {
       delete process.env['INPUT_LOCAL-NOTEBOOK-PATH']
       delete process.env['INPUT_WORKSPACE-NOTEBOOK-PATH']
+      delete process.env['INPUT_GIT-COMMIT']
     })
 
     test('retrevies local notebook path from action input', async () => {
       const expectedLocalNotebookPath = 'my/relative/path/notebook.py'
       process.env['INPUT_LOCAL-NOTEBOOK-PATH'] = expectedLocalNotebookPath
+      expect(utils.getNotebookPath()).toEqual(expectedLocalNotebookPath)
+    })
+
+    test('retrevies local notebook path without file extension if isGitRefSpecified', async () => {
+      process.env['INPUT_GIT-COMMIT'] = 'dummy-commit'
+      const actualLocalNotebookPath = 'my/relative/path/notebook.py'
+      const expectedLocalNotebookPath = 'my/relative/path/notebook'
+      process.env['INPUT_LOCAL-NOTEBOOK-PATH'] = actualLocalNotebookPath
       expect(utils.getNotebookPath()).toEqual(expectedLocalNotebookPath)
     })
 
@@ -379,13 +392,13 @@ describe(`input utils`, () => {
     test('getWorkspaceTempDir reads input', () => {
       const nbPath = '/Users/me/my-notebook'
       process.env['INPUT_WORKSPACE-TEMP-DIR'] = nbPath
-      expect(getWorkspaceTempDir()).toEqual(nbPath)
+      expect(utils.getWorkspaceTempDir()).toEqual(nbPath)
     })
 
     test('getWorkspaceTempDir validates workspace path', () => {
       const invalidPath = 'invalid/workspace/path'
       process.env['INPUT_WORKSPACE-TEMP-DIR'] = invalidPath
-      expect(getWorkspaceTempDir).toThrow(
+      expect(utils.getWorkspaceTempDir).toThrow(
         new Error(
           `workspace-temp-dir input must be an absolute Databricks workspace path. Got invalid path ${invalidPath}`
         )
@@ -403,5 +416,26 @@ describe('utils unit tests', () => {
       await utils.runStepAndHandleFailure(mockStepToRun)
     }).rejects.toThrow(new Error('step failed'))
     expect(getSetFailedMock()).toBeCalledWith('step failed')
+  })
+
+  test('debugLogging does not logs debug statement if debug is disabled', async () => {
+    getIsDebugMock().mockImplementation(() => false)
+
+    utils.debugLogging('This statement will not get logged')
+    expect(getDebugMock()).toBeCalledTimes(0)
+  })
+
+  test('debugLogging logs debug statement if debug is enabled', async () => {
+    getIsDebugMock().mockImplementation(() => true)
+
+    utils.debugLogging('This statement will get logged')
+
+    expect(getDebugMock()).toBeCalledWith('This statement will get logged')
+  })
+
+  test('infoLogging logs statement as info', async () => {
+    utils.infoLogging('This statement will get info logged')
+
+    expect(getInfoMock()).toBeCalledWith('This statement will get info logged')
   })
 })

@@ -93,6 +93,18 @@ export const getRequestMock = (): jest.Mock => {
   return require('../packages/common/src/request').httpRequest as jest.Mock
 }
 
+export const getInfoMock = (): jest.Mock => {
+  return require('@actions/core').info as jest.Mock
+}
+
+export const getIsDebugMock = (): jest.Mock => {
+  return require('@actions/core').isDebug as jest.Mock
+}
+
+export const getDebugMock = (): jest.Mock => {
+  return require('@actions/core').debug as jest.Mock
+}
+
 export const getGitRefMock = (): jest.Mock => {
   return require('../packages/common/src/utils').isGitRefSpecified as jest.Mock
 }
