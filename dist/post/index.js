@@ -51,11 +51,13 @@ class ApiClient {
             return response.run_id;
         });
     }
-    awaitJobAndGetOutput(runId) {
+    awaitJobAndGetOutput(runId, shouldLogJobRunUrl = true) {
         return __awaiter(this, void 0, void 0, function* () {
             const requestBody = { run_id: runId };
             const response = (yield this.request('/api/2.1/jobs/runs/get', 'GET', requestBody));
-            (0, utils_1.logJobRunUrl)(response.run_page_url);
+            if (shouldLogJobRunUrl) {
+                (0, utils_1.logJobRunUrl)(response.run_page_url);
+            }
             const taskRunId = response.tasks[0].run_id;
             const terminalStates = new Set(['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR']);
             if (terminalStates.has(response.state.life_cycle_state)) {
@@ -76,7 +78,7 @@ class ApiClient {
             }
             else {
                 yield new Promise(f => setTimeout(f, constants_1.GET_JOB_STATUS_POLL_INTERVAL_SECS * 1000));
-                return yield this.awaitJobAndGetOutput(runId);
+                return yield this.awaitJobAndGetOutput(runId, false);
             }
         });
     }
@@ -454,13 +456,8 @@ const debugLogging = (logStatement) => {
     }
 };
 exports.debugLogging = debugLogging;
-let urlHasBeenLogged = false;
 const logJobRunUrl = (jobRunUrl) => {
-    // Only log the run url once.
-    if (!urlHasBeenLogged) {
-        core.info(`The notebook run url is: ${jobRunUrl}`);
-        urlHasBeenLogged = true;
-    }
+    core.info(`The notebook run url is: ${jobRunUrl}`);
 };
 exports.logJobRunUrl = logJobRunUrl;
 

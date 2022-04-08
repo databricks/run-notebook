@@ -68,7 +68,10 @@ export class ApiClient {
     return response.run_id
   }
 
-  async awaitJobAndGetOutput(runId: number): Promise<JobRunOutput> {
+  async awaitJobAndGetOutput(
+    runId: number,
+    shouldLogJobRunUrl = true
+  ): Promise<JobRunOutput> {
     const requestBody = {run_id: runId}
     const response = (await this.request(
       '/api/2.1/jobs/runs/get',
@@ -84,7 +87,9 @@ export class ApiClient {
       tasks: {run_id: string}[]
     }
 
-    logJobRunUrl(response.run_page_url)
+    if (shouldLogJobRunUrl) {
+      logJobRunUrl(response.run_page_url)
+    }
 
     const taskRunId = response.tasks[0].run_id
     const terminalStates = new Set(['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR'])
@@ -120,7 +125,7 @@ export class ApiClient {
       await new Promise(f =>
         setTimeout(f, GET_JOB_STATUS_POLL_INTERVAL_SECS * 1000)
       )
-      return await this.awaitJobAndGetOutput(runId)
+      return await this.awaitJobAndGetOutput(runId, false)
     }
   }
 

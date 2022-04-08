@@ -436,9 +436,7 @@ describe('utils unit tests', () => {
   test('logJobRunUrl logs job run url once', async () => {
     const myJobUrl = 'my-url.com/jobs/run/1234'
     utils.logJobRunUrl(myJobUrl)
-    utils.logJobRunUrl(myJobUrl)
 
     expect(getInfoMock()).toBeCalledWith(`The notebook run url is: ${myJobUrl}`)
-    expect(getInfoMock()).toBeCalledTimes(1)
   })
 })
