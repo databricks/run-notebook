@@ -4,6 +4,7 @@ import {
   TOKEN,
   getRequestMock,
   mockApiRequest,
+  getInfoMock,
   setupExpectedApiCalls
 } from './test-utils'
 import {JOB_RUN_TASK_KEY} from '../packages/common/src/constants'
@@ -25,7 +26,8 @@ jest.mock('@actions/core', () => {
     ...jest.requireActual('@actions/core'),
     getState: jest.fn(),
     setFailed: jest.fn(),
-    setOutput: jest.fn()
+    setOutput: jest.fn(),
+    info: jest.fn()
   }
 })
 
@@ -35,6 +37,7 @@ describe('run-notebook integration tests', () => {
   const notebookPath = '/Users/mohamad.arabi@databricks.com/Hello World'
   const clusterId = 'fakeclusterid'
   const fakeClusterSpec = {existing_cluster_id: clusterId}
+  const runPageUrl = 'http://run-page-url.databricks.com'
   const expectedRunSubmitRequestBody = {
     tasks: [
       {
@@ -66,7 +69,8 @@ describe('run-notebook integration tests', () => {
           life_cycle_state: 'TERMINATED',
           result_state: 'SUCCESS',
           state_message: 'Run succeeded'
-        }
+        },
+        run_page_url: runPageUrl
       }),
       mockApiRequest(
         '/api/2.1/jobs/runs/get-output',
@@ -92,6 +96,11 @@ describe('run-notebook integration tests', () => {
     )
     const apiMock = getRequestMock()
     expect(apiMock).toBeCalledTimes(3)
+    const infoMock = getInfoMock()
+    expect(infoMock).toBeCalledTimes(1)
+    expect(infoMock).toBeCalledWith(
+      `Notebook run has status TERMINATED. URL: ${runPageUrl}`
+    )
   })
 
   test('all optional inputs from runAndAwaitNotebook are passed in correctly to request body of runs/submit', async () => {
@@ -167,7 +176,8 @@ describe('run-notebook integration tests', () => {
           life_cycle_state: 'TERMINATED',
           result_state: 'SUCCESS',
           state_message: 'Run succeeded'
-        }
+        },
+        run_page_url: runPageUrl
       }),
       mockApiRequest(
         '/api/2.1/jobs/runs/get-output',
@@ -213,19 +223,22 @@ describe('run-notebook integration tests', () => {
         tasks: [{run_id: taskRunId}],
         state: {
           life_cycle_state: 'PENDING'
-        }
+        },
+        run_page_url: runPageUrl
       }),
       mockApiRequest('/api/2.1/jobs/runs/get', 'GET', {run_id: runId}, 200, {
         tasks: [{run_id: taskRunId}],
         state: {
           life_cycle_state: 'RUNNING'
-        }
+        },
+        run_page_url: runPageUrl
       }),
       mockApiRequest('/api/2.1/jobs/runs/get', 'GET', {run_id: runId}, 200, {
         tasks: [{run_id: taskRunId}],
         state: {
           life_cycle_state: 'RUNNING'
-        }
+        },
+        run_page_url: runPageUrl
       }),
       mockApiRequest('/api/2.1/jobs/runs/get', 'GET', {run_id: runId}, 200, {
         tasks: [{run_id: taskRunId}],
@@ -233,7 +246,8 @@ describe('run-notebook integration tests', () => {
           life_cycle_state: 'TERMINATED',
           result_state: 'SUCCESS',
           state_message: 'Run succeeded'
-        }
+        },
+        run_page_url: runPageUrl
       }),
       mockApiRequest(
         '/api/2.1/jobs/runs/get-output',
@@ -259,6 +273,13 @@ describe('run-notebook integration tests', () => {
     )
     const apiMock = getRequestMock()
     expect(apiMock).toBeCalledTimes(6)
+    // Expect job URL to be printed on each call to /runs/get
+    const infoMock = getInfoMock()
+    expect(infoMock.mock.calls).toEqual(
+      ['PENDING', 'RUNNING', 'RUNNING', 'TERMINATED'].map(runStatus => [
+        `Notebook run has status ${runStatus}. URL: ${runPageUrl}`
+      ])
+    )
   })
 
   test.each([
