@@ -206,6 +206,12 @@ export const debugLogging = (logStatement: string): void => {
   }
 }
 
-export const infoLogging = (logStatement: string): void => {
-  core.info(logStatement)
+let urlHasBeenLogged = false
+
+export const logJobRunUrl = (jobRunUrl: string): void => {
+  // Only log the run url once.
+  if (!urlHasBeenLogged) {
+    core.info(`The notebook run url is: ${jobRunUrl}`)
+    urlHasBeenLogged = true
+  }
 }

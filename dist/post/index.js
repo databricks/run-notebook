@@ -29,7 +29,6 @@ class ApiClient {
         this.host = host;
         this.token = token;
         this.actionVerson = __nccwpck_require__(306)/* .version */ .i8;
-        this.urlHasBeenLogged = false;
     }
     request(path, method, body) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -56,11 +55,7 @@ class ApiClient {
         return __awaiter(this, void 0, void 0, function* () {
             const requestBody = { run_id: runId };
             const response = (yield this.request('/api/2.1/jobs/runs/get', 'GET', requestBody));
-            // Only log the run url once.
-            if (!this.urlHasBeenLogged) {
-                (0, utils_1.infoLogging)(`The notebook run url is: ${response.run_page_url}`);
-                this.urlHasBeenLogged = true;
-            }
+            (0, utils_1.logJobRunUrl)(response.run_page_url);
             const taskRunId = response.tasks[0].run_id;
             const terminalStates = new Set(['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR']);
             if (terminalStates.has(response.state.life_cycle_state)) {
@@ -274,7 +269,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.infoLogging = exports.debugLogging = exports.runStepAndHandleFailure = exports.isGitRefSpecified = exports.getGitSourceSpec = exports.getRunNameSpec = exports.getTimeoutSpec = exports.getAclSpec = exports.getNotebookParamsSpec = exports.getLibrariesSpec = exports.getClusterSpec = exports.getNotebookPath = exports.getDatabricksToken = exports.getWorkspaceTempDir = exports.getDatabricksHost = void 0;
+exports.logJobRunUrl = exports.debugLogging = exports.runStepAndHandleFailure = exports.isGitRefSpecified = exports.getGitSourceSpec = exports.getRunNameSpec = exports.getTimeoutSpec = exports.getAclSpec = exports.getNotebookParamsSpec = exports.getLibrariesSpec = exports.getClusterSpec = exports.getNotebookPath = exports.getDatabricksToken = exports.getWorkspaceTempDir = exports.getDatabricksHost = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const path_1 = __nccwpck_require__(622);
 const getDatabricksHost = () => {
@@ -459,10 +454,15 @@ const debugLogging = (logStatement) => {
     }
 };
 exports.debugLogging = debugLogging;
-const infoLogging = (logStatement) => {
-    core.info(logStatement);
+let urlHasBeenLogged = false;
+const logJobRunUrl = (jobRunUrl) => {
+    // Only log the run url once.
+    if (!urlHasBeenLogged) {
+        core.info(`The notebook run url is: ${jobRunUrl}`);
+        urlHasBeenLogged = true;
+    }
 };
-exports.infoLogging = infoLogging;
+exports.logJobRunUrl = logJobRunUrl;
 
 
 /***/ }),

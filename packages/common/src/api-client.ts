@@ -1,5 +1,5 @@
 import {GET_JOB_STATUS_POLL_INTERVAL_SECS, JOB_RUN_TASK_KEY} from './constants'
-import {debugLogging, infoLogging} from './utils'
+import {debugLogging, logJobRunUrl} from './utils'
 import {Buffer} from 'buffer'
 import {JobRunOutput} from './interfaces'
 import {extname} from 'path'
@@ -11,13 +11,11 @@ export class ApiClient {
   host: string
   token: string
   actionVerson: string
-  urlHasBeenLogged: boolean
 
   constructor(host: string, token: string) {
     this.host = host
     this.token = token
     this.actionVerson = require('../../../package.json').version
-    this.urlHasBeenLogged = false
   }
 
   async request(path: string, method: string, body: object): Promise<object> {
@@ -86,11 +84,7 @@ export class ApiClient {
       tasks: {run_id: string}[]
     }
 
-    // Only log the run url once.
-    if (!this.urlHasBeenLogged) {
-      infoLogging(`The notebook run url is: ${response.run_page_url}`)
-      this.urlHasBeenLogged = true
-    }
+    logJobRunUrl(response.run_page_url)
 
     const taskRunId = response.tasks[0].run_id
     const terminalStates = new Set(['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR'])
