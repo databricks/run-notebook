@@ -19,8 +19,26 @@ You can use this Action to trigger code execution on Databricks for CI (e.g. on 
 to master).  
 
 # Prerequisites
-To use this Action, you need a Databricks REST API token to trigger notebook execution and await completion. We
-recommend that you store the token in [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
+To use this Action, you need a Databricks REST API token to trigger notebook execution and await completion. The API
+token must be associated with a principal with the following permissions:
+* Cluster permissions ([AWS](https://docs.databricks.com/security/access-control/cluster-acl.html#types-of-permissions) |
+[Azure](https://docs.microsoft.com/en-us/azure/databricks/security/access-control/cluster-acl#types-of-permissions) |
+[GCP](https://docs.gcp.databricks.com/security/access-control/cluster-acl.html)): Unrestricted cluster creation,
+if running the notebook against a new cluster (recommended), or "Can restart" permission, if running the notebook
+against an existing cluster.
+* Workspace permissions ([AWS](https://docs.databricks.com/security/access-control/workspace-acl.html#folder-permissions) |
+[Azure](https://docs.microsoft.com/en-us/azure/databricks/security/access-control/workspace-acl#--folder-permissions) |
+[GCP](https://docs.gcp.databricks.com/security/access-control/workspace-acl.html#folder-permissions)):
+  * If supplying `local-notebook-path` with one of the `git-commit`, `git-tag`, or `git-branch` parameters, no workspace
+    permissions are required. However, your principal must have Git integration configured
+    ([AWS](https://docs.databricks.com/repos/index.html#configure-your-git-integration-with-databricks) |
+    [Azure](https://docs.microsoft.com/en-us/azure/databricks/repos/#--configure-your-git-integration-with-azure-databricks) |
+    [GCP](https://docs.gcp.databricks.com/repos/index.html#configure-your-git-integration-with-databricks))
+  * If supplying the `local-notebook-path` parameter, "Can manage" permissions on the directory specified by the
+    `workspace-temp-dir` parameter (the `/tmp/databricks-github-actions` directory if `workspace-temp-dir` is unspecified).
+  * If supplying the `workspace-notebook-path`  parameter, "Can read" permissions on the specified notebook.
+
+We recommend that you store the Databricks REST API token in [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 to pass it into your GitHub Workflow. The following section lists recommended approaches for token creation by cloud.
 
 ## AWS
@@ -35,8 +53,13 @@ For security reasons, we recommend using a Databricks service principal AAD toke
 You can:
 * Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) 
 * Run `az login` to authenticate with Azure 
-* Run `az ad sp create-for-rbac -n <your-service-principal-name>` to create a service principal and client secret. Store the resulting JSON output
-  as a GitHub Actions secret named e.g. `AZURE_CREDENTIALS`
+* Run `az ad sp create-for-rbac -n <your-service-principal-name> --sdk-auth --scopes /subscriptions/<azure-subscription-id>/resourceGroups/<resource-group-name> --sdk-auth --role contributor`,
+  specifying the subscription and resource group of your Azure Databricks workspace, to create a service principal and client secret.
+  Store the resulting JSON output as a GitHub Actions secret named e.g. `AZURE_CREDENTIALS`
+* Get the `applicationId` of your new service principal by running `az ad sp show --id <clientId from previous command output>`, using
+  the `clientId` field from the JSON output of the previous step.
+* [Add your service principal](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/scim/scim-sp#add-service-principal) to your workspace. Use the
+  `clientId` output field of the previous step as the `applicationId` of the service principal
 * At the start of your Workflow, use the [Azure/login Action](https://github.com/Azure/login) to authenticate to Azure
   as your service principal, passing `${{ secrets.AZURE_CREDENTIALS }}` from the previous step.
 * Run `echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV` to create an AD token
@@ -120,9 +143,9 @@ PyPI.
 
 Databricks supports a range of library types, including Maven and CRAN. See 
 the docs
-[Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/libraries#--library) |
+([Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/libraries#--library) |
 [AWS](https://docs.databricks.com/dev-tools/api/latest/libraries.html#library) |
-[GCP](https://docs.gcp.databricks.com/dev-tools/api/latest/libraries.html#library) |
+[GCP](https://docs.gcp.databricks.com/dev-tools/api/latest/libraries.html#library))
 
 for more information.
 
@@ -343,9 +366,9 @@ jobs:
 ```
 
 # Troubleshooting
-In order to be able to debug run-notebook failures 
-such as inspecting `runs/submit` payload,
-then please set `ACTIONS_STEP_DEBUG` action secret to `true`. 
+To enable debug logging for Databricks REST API requests (e.g. to inspect the payload of a bad `/api/2.0/jobs/runs/submit`
+Databricks REST API request), you can set the `ACTIONS_STEP_DEBUG` action secret to
+`true`.
 See [Step Debug Logs](https://github.com/actions/toolkit/blob/master/docs/action-debugging.md#how-to-access-step-debug-logs) 
 for further details.
 
