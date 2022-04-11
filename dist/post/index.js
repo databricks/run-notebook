@@ -531,7 +531,7 @@ function runPostHelper() {
     return __awaiter(this, void 0, void 0, function* () {
         const tmpNotebookDirectory = core.getState(constants_1.DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY);
         if (tmpNotebookDirectory) {
-            yield (0, delete_tmp_notebook_1.deleteTmpNotebooks)(core.getInput('databricks-host'), core.getInput('databricks-token'), tmpNotebookDirectory);
+            yield (0, delete_tmp_notebook_1.deleteTmpNotebooks)((0, utils_1.getDatabricksHost)(), (0, utils_1.getDatabricksToken)(), tmpNotebookDirectory);
         }
     });
 }

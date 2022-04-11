@@ -140,7 +140,6 @@ export class ApiClient {
 
   readNotebookContents(path: string): string {
     try {
-
       return readFileSync(path, 'utf8')
     } catch (error) {
       throw new Error(
