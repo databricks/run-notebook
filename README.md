@@ -21,8 +21,7 @@ to master).
 # Prerequisites
 To use this Action, you need a Databricks REST API token to trigger notebook execution and await completion. The API
 token must be associated with a principal with the following permissions:
-* Cluster permissions (
-[AWS](https://docs.databricks.com/security/access-control/cluster-acl.html#types-of-permissions) |
+* Cluster permissions ([AWS](https://docs.databricks.com/security/access-control/cluster-acl.html#types-of-permissions) |
 [Azure](https://docs.microsoft.com/en-us/azure/databricks/security/access-control/cluster-acl#types-of-permissions) |
 [GCP](https://docs.gcp.databricks.com/security/access-control/cluster-acl.html)): Unrestricted cluster creation,
 , if running the notebook against a new cluster (recommended), or "Can restart" permission, if running the notebook
@@ -31,8 +30,8 @@ against an existing cluster.
 [Azure](https://docs.microsoft.com/en-us/azure/databricks/security/access-control/workspace-acl#--folder-permissions) |
 [GCP](https://docs.gcp.databricks.com/security/access-control/workspace-acl.html#folder-permissions)):
   * If supplying `local-notebook-path` with one of the `git-commit`, `git-tag`, or `git-branch` parameters, no workspace
-    permissions are required. However, your principal must have Git integration configured (
-    [AWS](https://docs.databricks.com/repos/index.html#configure-your-git-integration-with-databricks) |
+    permissions are required. However, your principal must have Git integration configured
+    ([AWS](https://docs.databricks.com/repos/index.html#configure-your-git-integration-with-databricks) |
     [Azure](https://docs.microsoft.com/en-us/azure/databricks/repos/#--configure-your-git-integration-with-azure-databricks) |
     [GCP](https://docs.gcp.databricks.com/repos/index.html#configure-your-git-integration-with-databricks))
   * If supplying the `local-notebook-path` parameter, "Can manage" permissions on the directory specified by the
@@ -141,9 +140,9 @@ PyPI.
 
 Databricks supports a range of library types, including Maven and CRAN. See 
 the docs
-[Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/libraries#--library) |
+([Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/libraries#--library) |
 [AWS](https://docs.databricks.com/dev-tools/api/latest/libraries.html#library) |
-[GCP](https://docs.gcp.databricks.com/dev-tools/api/latest/libraries.html#library) |
+[GCP](https://docs.gcp.databricks.com/dev-tools/api/latest/libraries.html#library))
 
 for more information.
 
@@ -364,9 +363,9 @@ jobs:
 ```
 
 # Troubleshooting
-In order to be able to debug run-notebook failures 
-such as inspecting `runs/submit` payload,
-then please set `ACTIONS_STEP_DEBUG` action secret to `true`. 
+To enable debug logging for Databricks REST API requests (e.g. to inspect the payload of a bad `/api/2.0/jobs/runs/submit`
+Databricks REST API request), you can set the `ACTIONS_STEP_DEBUG` action secret to
+`true`.
 See [Step Debug Logs](https://github.com/actions/toolkit/blob/master/docs/action-debugging.md#how-to-access-step-debug-logs) 
 for further details.
 
