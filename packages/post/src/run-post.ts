@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import {deleteTmpNotebooks} from './delete-tmp-notebook'
 import {DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY} from '../../common/src/constants'
-import {runStepAndHandleFailure} from '../../common/src/utils'
+import {runStepAndHandleFailure, getDatabricksToken, getDatabricksHost} from '../../common/src/utils'
 
 async function runPostHelper(): Promise<void> {
   const tmpNotebookDirectory = core.getState(
@@ -9,8 +9,8 @@ async function runPostHelper(): Promise<void> {
   )
   if (tmpNotebookDirectory) {
     await deleteTmpNotebooks(
-      core.getInput('databricks-host'),
-      core.getInput('databricks-token'),
+      getDatabricksHost(),
+      getDatabricksToken(),
       tmpNotebookDirectory
     )
   }
