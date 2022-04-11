@@ -24,7 +24,7 @@ token must be associated with a principal with the following permissions:
 * Cluster permissions ([AWS](https://docs.databricks.com/security/access-control/cluster-acl.html#types-of-permissions) |
 [Azure](https://docs.microsoft.com/en-us/azure/databricks/security/access-control/cluster-acl#types-of-permissions) |
 [GCP](https://docs.gcp.databricks.com/security/access-control/cluster-acl.html)): Unrestricted cluster creation,
-, if running the notebook against a new cluster (recommended), or "Can restart" permission, if running the notebook
+if running the notebook against a new cluster (recommended), or "Can restart" permission, if running the notebook
 against an existing cluster.
 * Workspace permissions ([AWS](https://docs.databricks.com/security/access-control/workspace-acl.html#folder-permissions) |
 [Azure](https://docs.microsoft.com/en-us/azure/databricks/security/access-control/workspace-acl#--folder-permissions) |
@@ -53,7 +53,7 @@ For security reasons, we recommend using a Databricks service principal AAD toke
 You can:
 * Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) 
 * Run `az login` to authenticate with Azure 
-* Run `az ad sp create-for-rbac -n <your-service-principal-name> --sdk-auth --scopes /subscriptions/<your azure subscription id>/resourceGroups/<your resource group name> --sdk-auth --role contributor`,
+* Run `az ad sp create-for-rbac -n <your-service-principal-name> --sdk-auth --scopes /subscriptions/<azure-subscription-id>/resourceGroups/<resource-group-name> --sdk-auth --role contributor`,
   specifying the subscription and resource group of your Azure Databricks workspace, to create a service principal and client secret.
   Store the resulting JSON output as a GitHub Actions secret named e.g. `AZURE_CREDENTIALS`
 * Get the `applicationId` of your new service principal by running `az ad sp show --id <clientId from previous command output>`, using
