@@ -53,8 +53,11 @@ For security reasons, we recommend using a Databricks service principal AAD toke
 You can:
 * Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) 
 * Run `az login` to authenticate with Azure 
-* Run `az ad sp create-for-rbac -n <your-service-principal-name> --sdk-auth --scopes /subscriptions/<your azure subscription id>/resourceGroups/<your resource group name> --sdk-auth --role contributor` to create a service principal and client secret. Store the resulting JSON output
-  as a GitHub Actions secret named e.g. `AZURE_CREDENTIALS`
+* Run `az ad sp create-for-rbac -n <your-service-principal-name> --sdk-auth --scopes /subscriptions/<your azure subscription id>/resourceGroups/<your resource group name> --sdk-auth --role contributor`,
+  specifying the subscription and resource group of your Azure Databricks workspace, to create a service principal and client secret.
+  Store the resulting JSON output as a GitHub Actions secret named e.g. `AZURE_CREDENTIALS`
+* Get the `applicationId` of your new service principal by running `az ad sp show --id <clientId from previous command output>`, using
+  the `clientId` field from the JSON output of the previous step.
 * [Add your service principal](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/scim/scim-sp#add-service-principal) to your workspace. Use the
   `clientId` output field of the previous step as the `applicationId` of the service principal
 * At the start of your Workflow, use the [Azure/login Action](https://github.com/Azure/login) to authenticate to Azure
