@@ -109,7 +109,7 @@ jobs:
           access-control-list-json: >
             [
               {
-                "users": "Can View",
+                "users": "Can View"
               }
             ]
 ```
@@ -181,7 +181,7 @@ jobs:
           access-control-list-json: >
             [
               {
-                "users": "Can View",
+                "users": "Can View"
               }
             ]
 ```
@@ -231,7 +231,7 @@ jobs:
           access-control-list-json: >
             [
               {
-                "users": "Can View",
+                "users": "Can View"
               }
             ]
 ```
@@ -275,7 +275,7 @@ jobs:
           access-control-list-json: >
             [
               {
-                "devops": "Can View",
+                "devops": "Can View"
               }
             ]
       - name: Trigger notebook in prod
@@ -298,7 +298,7 @@ jobs:
           access-control-list-json: >
             [
               {
-                "devops": "Can View",
+                "devops": "Can View"
               }
             ]
 ```
