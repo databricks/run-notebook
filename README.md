@@ -50,26 +50,8 @@ and [generate an API token](https://docs.databricks.com/dev-tools/api/latest/tok
 
 ## Azure
 You can create a Personal Access Token from the `User Settings` page in the
-Databricks workspace. That PAT can be passed into the actions instead of the Service Principal's
-AAD. The generated PAT can be stored as a GitHub Actions secret named e.g. `MY_DATABRICKS_PERSONAL_TOKEN`.
-
-Alternatively, you can use a Databricks service principal AAD token.
-You can:
-* Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) 
-* Run `az login` to authenticate with Azure 
-* Run `az ad sp create-for-rbac -n <your-service-principal-name> --sdk-auth --scopes /subscriptions/<azure-subscription-id>/resourceGroups/<resource-group-name> --sdk-auth --role contributor`,
-  specifying the subscription and resource group of your Azure Databricks workspace, to create a service principal and client secret.
-  Store the resulting JSON output as a GitHub Actions secret named e.g. `AZURE_CREDENTIALS`
-* Get the `applicationId` of your new service principal by running `az ad sp show --id <clientId from previous command output>`, using
-  the `clientId` field from the JSON output of the previous step.
-* [Add your service principal](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/scim/scim-sp#add-service-principal) to your workspace. Use the
-  `clientId` output field of the previous step as the `applicationId` of the service principal
-* At the start of your Workflow, use the [Azure/login Action](https://github.com/Azure/login) to authenticate to Azure
-  as your service principal, passing `${{ secrets.AZURE_CREDENTIALS }}` from the previous step.
-* Run `echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV` to create an AD token
-  on behalf of the service principal and assign its value to the `DATABRICKS_TOKEN` environment variable. The 
-  `databricks/run-notebook` Action will automatically detect and use the value in `DATABRICKS_TOKEN` to authenticate
-  to Databricks.
+Databricks workspace and pass it to the action as an input.
+The generated token can be stored as a GitHub Actions secret named e.g. `MY_DATABRICKS_PERSONAL_TOKEN`.
 
 ## GCP
 For security reasons, we recommend inviting a service user to your Databricks workspace and using their API token.
@@ -222,6 +204,7 @@ on:
 
 env:
   DATABRICKS_HOST: https://adb-XXXX.XX.azuredatabricks.net
+  DATABRICKS_TOKEN: ${{ secrets.MY_DATABRICKS_PERSONAL_TOKEN }}
 
 jobs:
   build:
@@ -230,16 +213,6 @@ jobs:
     steps:
       - name: Checks out the repo
         uses: actions/checkout@v2
-        # Obtain an AAD token and use it to run the notebook on Databricks
-        # Note: If running on AWS or GCP, you can directly pass your service principal
-        # token via the databricks-host input instead
-      - name: Log into Azure
-        uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.STAGING_AZURE_CREDENTIALS }}
-      - name: Generate and save AAD token
-        run: |
-          echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV
       - name: Trigger model training notebook from PR branch
         uses: databricks/run-notebook@v0
         with:
@@ -283,20 +256,11 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-        # Obtain an AAD token and use it to run the notebook on Databricks
-        # Note: If running on AWS or GCP, you can directly pass your service principal
-        # token via the databricks-host input instead
-      - name: Log into staging Azure
-        uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.STAGING_AZURE_CREDENTIALS }}
-      - name: Generate and save staging AAD token
-        run: |
-          echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV
       - name: Trigger notebook in staging
         uses: databricks/run-notebook@v0
         with:
           databricks-host: https://adb-staging.XX.azuredatabricks.net
+          token: ${{ secrets.DATABRICKS_STAGING_WORKSPACE_API_TOKEN }}
           local-notebook-path: notebooks/MainNotebook.py
           # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
           # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
@@ -315,16 +279,6 @@ jobs:
                 "devops": "Can View",
               }
             ]
-        # Obtain an AAD token and use it to run the notebook on Databricks
-        # Note: If running on AWS or GCP, you can directly pass your service principal
-        # token via the databricks-host input instead
-      - name: Log into prod Azure
-        uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.PROD_AZURE_CREDENTIALS }}
-      - name: Generate and save prod AAD token
-        run: |
-          echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV
       - name: Trigger notebook in prod
         uses: databricks/run-notebook@v0
         with:
