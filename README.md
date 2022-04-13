@@ -1,4 +1,4 @@
-# run-notebook V0
+# run-notebook v0
 
 # Overview
 Given a Databricks notebook and cluster specification, this Action runs the notebook as a one-time Databricks Job
