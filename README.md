@@ -166,16 +166,6 @@ jobs:
       - name: Build wheel
         run: |
           python setup.py bdist_wheel
-        # Obtain an AAD token and use it to run the notebook on Databricks
-        # Note: If running on AWS or GCP, you can directly pass your service principal
-        # token via the databricks-host input instead
-      - name: Log into Azure
-        uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Generate and save AAD token
-        run: |
-          echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV
       # Uploads local file (Python wheel) to temporary Databricks DBFS
       # path and returns path. See https://github.com/databricks/upload-dbfs-tempfile
       # for details.
