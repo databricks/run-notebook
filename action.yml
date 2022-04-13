@@ -137,7 +137,12 @@ inputs:
       (https://docs.databricks.com/repos/index.html). For example, you can set
       `git-commit` to `GITHUB_SHA` to run the notebook in the context of its enclosing
       repo against the commit that triggered the current GitHub Workflow,
-      e.g. to run a notebook from the current PR branch
+      e.g. to run a notebook from the current PR branch.
+
+      Known limitation: The supplied `local-notebook-path` must be a Databricks notebook
+      exported as source via the UI (https://docs.databricks.com/notebooks/notebooks-manage.html#export-a-notebook)
+      or REST API (https://docs.databricks.com/dev-tools/api/latest/workspace.html#export),
+      rather than an arbitrary Python/Scala/R file.
     required: false
   git-branch:
     description: >
@@ -153,6 +158,11 @@ inputs:
       files within the same repo (e.g imports Python modules within the same repo) or
       that was developed using [Databricks Repos]
       (https://docs.databricks.com/repos/index.html).
+
+      Known limitation: The supplied `local-notebook-path` must be a Databricks notebook
+      exported as source via the UI (https://docs.databricks.com/notebooks/notebooks-manage.html#export-a-notebook)
+      or REST API (https://docs.databricks.com/dev-tools/api/latest/workspace.html#export),
+      rather than an arbitrary Python/Scala/R file.
     required: false
   git-tag:
     description: >
@@ -167,6 +177,11 @@ inputs:
       files within the same repo (e.g imports Python modules within the same repo) or
       that was developed using [Databricks Repos]
       (https://docs.databricks.com/repos/index.html).
+
+      Known limitation: The supplied `local-notebook-path` must be a Databricks notebook
+      exported as source via the UI (https://docs.databricks.com/notebooks/notebooks-manage.html#export-a-notebook)
+      or REST API (https://docs.databricks.com/dev-tools/api/latest/workspace.html#export),
+      rather than an arbitrary Python/Scala/R file.
     required: false
 outputs:
   notebook-output:

@@ -49,23 +49,10 @@ grant the Service Principal
 and [generate an API token](https://docs.databricks.com/dev-tools/api/latest/token-management.html#operation/create-obo-token) on its behalf.
 
 ## Azure
-For security reasons, we recommend using a Databricks service principal AAD token.
-You can:
-* Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) 
-* Run `az login` to authenticate with Azure 
-* Run `az ad sp create-for-rbac -n <your-service-principal-name> --sdk-auth --scopes /subscriptions/<azure-subscription-id>/resourceGroups/<resource-group-name> --sdk-auth --role contributor`,
-  specifying the subscription and resource group of your Azure Databricks workspace, to create a service principal and client secret.
-  Store the resulting JSON output as a GitHub Actions secret named e.g. `AZURE_CREDENTIALS`
-* Get the `applicationId` of your new service principal by running `az ad sp show --id <clientId from previous command output>`, using
-  the `clientId` field from the JSON output of the previous step.
-* [Add your service principal](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/scim/scim-sp#add-service-principal) to your workspace. Use the
-  `clientId` output field of the previous step as the `applicationId` of the service principal
-* At the start of your Workflow, use the [Azure/login Action](https://github.com/Azure/login) to authenticate to Azure
-  as your service principal, passing `${{ secrets.AZURE_CREDENTIALS }}` from the previous step.
-* Run `echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV` to create an AD token
-  on behalf of the service principal and assign its value to the `DATABRICKS_TOKEN` environment variable. The 
-  `databricks/run-notebook` Action will automatically detect and use the value in `DATABRICKS_TOKEN` to authenticate
-  to Databricks.
+[//]: # (TODO: Add back steps to create an Azure Service Principal.)
+You can create a Personal Access Token from the `User Settings` page in the
+Databricks workspace and pass it to the action as an input.
+The generated token can be stored as a GitHub Actions secret named e.g. `MY_DATABRICKS_PERSONAL_TOKEN`.
 
 ## GCP
 For security reasons, we recommend inviting a service user to your Databricks workspace and using their API token.
@@ -90,50 +77,41 @@ notebook-scoped libraries
 name: Run a notebook in the current repo on PRs
 
 on:
- pull_request
+  pull_request
 
 env:
- DATABRICKS_HOST: https://adb-XXXX.XX.azuredatabricks.net
+  DATABRICKS_HOST: https://adb-XXXX.XX.azuredatabricks.net
 
 jobs:
- build:
-   runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-   steps:
-     - name: Checkout repo
-       uses: actions/checkout@v2
-       # Obtain an AAD token and use it to run the notebook on Databricks
-       # Note: If running on AWS or GCP, you can directly pass your service principal
-       # token via the databricks-host input instead
-     - name: Log into Azure
-       uses: Azure/login@v1
-       with:
-         creds: ${{ secrets.AZURE_CREDENTIALS }}
-     - name: Generate and save AAD token
-       run: |
-         echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV          
-     - name: Trigger notebook from PR branch
-       uses: databricks/run-notebook@v0
-       with:
-         local-notebook-path: notebooks/MainNotebook.py
-         # Alternatively, specify an existing-cluster-id to run against an existing cluster.
-         # The cluter JSON below is for Azure Databricks. On AWS and GCP, set
-         # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
-         # AWS or "n1-highmem-4" for GCP
-         new-cluster-json: >
-           {
-             "num_workers": 1,
-             "spark_version": "10.4.x-scala2.12",
-             "node_type_id": "Standard_D3_v2"
-           }
-         # Grant all users view permission on the notebook results, so that they can
-         # see the result of our CI notebook 
-         access-control-list-json: >
-           [
-             {
-               "users": "Can View",
-             }
-           ]
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2     
+      - name: Trigger notebook from PR branch
+        uses: databricks/run-notebook@v0
+        with:
+          local-notebook-path: notebooks/MainNotebook.py
+          databricks-token: ${{ secrets.MY_DATABRICKS_PERSONAL_TOKEN }}
+          # Alternatively, specify an existing-cluster-id to run against an existing cluster.
+          # The cluter JSON below is for Azure Databricks. On AWS and GCP, set
+          # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
+          # AWS or "n1-highmem-4" for GCP
+          new-cluster-json: >
+            {
+              "num_workers": 1,
+              "spark_version": "10.4.x-scala2.12",
+              "node_type_id": "Standard_D3_v2"
+            }
+          # Grant all users view permission on the notebook results, so that they can
+          # see the result of our CI notebook 
+          access-control-list-json: >
+            [
+              {
+                "users": "Can View",
+              }
+            ]
 ```
 
 ### Run a notebook using library dependencies in the current repo and on PyPI
@@ -153,70 +131,59 @@ for more information.
 name: Run a single notebook on PRs
 
 on:
- pull_request
+  pull_request
 
 env:
- DATABRICKS_HOST: https://adb-XXXX.XX.azuredatabricks.net
+  DATABRICKS_HOST: https://adb-XXXX.XX.azuredatabricks.net
+  DATABRICKS_TOKEN: ${{ secrets.MY_DATABRICKS_PERSONAL_TOKEN }}
 
 jobs:
- build:
-   runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-   steps:
-     - name: Checks out the repo
-       uses: actions/checkout@v2
-     - name: Setup python
-       uses: actions/setup-python@v2
-     - name: Build wheel
-       run:
-         python setup.py bdist_wheel
-       # Obtain an AAD token and use it to run the notebook on Databricks
-       # Note: If running on AWS or GCP, you can directly pass your service principal
-       # token via the databricks-host input instead
-     - name: Log into Azure
-       uses: Azure/login@v1
-       with:
-         creds: ${{ secrets.AZURE_CREDENTIALS }}
-     - name: Generate and save AAD token
-       run: |
-         echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV
-     # Uploads local file (Python wheel) to temporary Databricks DBFS
-     # path and returns path. See https://github.com/databricks/upload-dbfs-tempfile
-     # for details.
-     - name: Upload Wheel
-       uses: databricks/upload-dbfs@v0
-       with:
-         path: dist/my-project.whl
-       id: upload_wheel
-     - name: Trigger model training notebook from PR branch
-       uses: databricks/run-notebook@v0
-       with:
-         local-notebook-path: notebooks/deployments/MainNotebook
-         # Install the wheel built in the previous step as a library
-         # on the cluster used to run our notebook
-         # TODO: the format of this input may change, in which case we should
-         # update this example accordingly
-         libraries-json: >
-           [
-             {"whl": ${{ steps.upload_wheel.outputs.dbfs-file-path }}},
-             {"pypi": "mlflow"}
-           ]
-         # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
-         # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
-         # AWS or "n1-highmem-4" for GCP
-         new-cluster-json: >
-           {
-             "num_workers": 1,
-             "spark_version": "10.4.x-scala2.12",
-             "node_type_id": "Standard_D3_v2"
-           }
-         # Grant all users view permission on the notebook results
-         access-control-list-json: >
-           [
-             {
-               "users": "Can View",
-             }
-           ]
+    steps:
+      - name: Checks out the repo
+        uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v2
+      - name: Build wheel
+        run: |
+          python setup.py bdist_wheel
+      # Uploads local file (Python wheel) to temporary Databricks DBFS
+      # path and returns path. See https://github.com/databricks/upload-dbfs-tempfile
+      # for details.
+      - name: Upload Wheel
+        uses: databricks/upload-dbfs-temp@v0
+        with:
+          local-path: dist/my-project.whl
+        id: upload_wheel
+      - name: Trigger model training notebook from PR branch
+        uses: databricks/run-notebook@v0
+        with:
+          local-notebook-path: notebooks/deployments/MainNotebook
+          # Install the wheel built in the previous step as a library
+          # on the cluster used to run our notebook
+          libraries-json: >
+            [
+              { "whl": "${{ steps.upload_wheel.outputs.dbfs-file-path }}" },
+              { "pypi": "mlflow" }
+            ]
+          # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
+          # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
+          # AWS or "n1-highmem-4" for GCP
+          new-cluster-json: >
+            {
+              "num_workers": 1,
+              "spark_version": "10.4.x-scala2.12",
+              "node_type_id": "Standard_D3_v2"
+            }
+          # Grant all users view permission on the notebook results
+          access-control-list-json: >
+            [
+              {
+                "users": "Can View",
+              }
+            ]
 ```
 
 ### Run notebook within a temporary checkout of the current Repo
@@ -232,50 +199,41 @@ current repo.
 name: Run a notebook within its repo on PRs
 
 on:
- pull_request
+  pull_request
 
 env:
- DATABRICKS_HOST: https://adb-XXXX.XX.azuredatabricks.net
+  DATABRICKS_HOST: https://adb-XXXX.XX.azuredatabricks.net
+  DATABRICKS_TOKEN: ${{ secrets.MY_DATABRICKS_PERSONAL_TOKEN }}
 
 jobs:
- build:
-   runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-   steps:
-     - name: Checks out the repo
-       uses: actions/checkout@v2
-       # Obtain an AAD token and use it to run the notebook on Databricks
-       # Note: If running on AWS or GCP, you can directly pass your service principal
-       # token via the databricks-host input instead
-     - name: Log into Azure
-       uses: Azure/login@v1
-       with:
-         creds: ${{ secrets.STAGING_AZURE_CREDENTIALS }}
-     - name: Generate and save AAD token
-       run: |
-         echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV
-     - name: Trigger model training notebook from PR branch
-       uses: databricks/run-notebook@v0
-       with:
-         # Run our notebook against a remote repo
-         local-notebook-path: notebooks/deployments/MainNotebook
-         git-commit: $GITHUB_SHA
-         # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
-         # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
-         # AWS or "n1-highmem-4" for GCP
-         new-cluster-json: >
-           {
-             "num_workers": 1,
-             "spark_version": "10.4.x-scala2.12",
-             "node_type_id": "Standard_D3_v2"
-           }
-         # Grant all users view permission on the notebook results
-         access-control-list-json: >
-           [
-             {
-               "users": "Can View",
-             }
-           ]
+    steps:
+      - name: Checks out the repo
+        uses: actions/checkout@v2
+      - name: Trigger model training notebook from PR branch
+        uses: databricks/run-notebook@v0
+        with:
+          # Run our notebook against a remote repo
+          local-notebook-path: notebooks/deployments/MainNotebook
+          git-commit: $GITHUB_SHA
+          # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
+          # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
+          # AWS or "n1-highmem-4" for GCP
+          new-cluster-json: >
+            {
+              "num_workers": 1,
+              "spark_version": "10.4.x-scala2.12",
+              "node_type_id": "Standard_D3_v2"
+            }
+          # Grant all users view permission on the notebook results
+          access-control-list-json: >
+            [
+              {
+                "users": "Can View",
+              }
+            ]
 ```
 
 ### Run notebooks in different Databricks Workspaces
@@ -286,83 +244,63 @@ to each `run-notebook` step to trigger notebook execution against different work
 name: Run a notebook in the current repo on pushes to main
 
 on:
- push
+  push
     branches:
       - main
 
 jobs:
- build:
-   runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-   steps:
-     - name: Checkout repo
-       uses: actions/checkout@v2
-       # Obtain an AAD token and use it to run the notebook on Databricks
-       # Note: If running on AWS or GCP, you can directly pass your service principal
-       # token via the databricks-host input instead
-     - name: Log into staging Azure
-       uses: Azure/login@v1
-       with:
-         creds: ${{ secrets.STAGING_AZURE_CREDENTIALS }}
-     - name: Generate and save staging AAD token
-       run: |
-         echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV
-     - name: Trigger notebook in staging
-       uses: databricks/run-notebook@v0
-       with:
-         databricks-host: https://adb-staging.XX.azuredatabricks.net
-         local-notebook-path: notebooks/MainNotebook.py
-         # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
-         # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
-         # AWS or "n1-highmem-4" for GCP
-         new-cluster-json: >
-           {
-             "num_workers": 1,
-             "spark_version": "10.4.x-scala2.12",
-             "node_type_id": "Standard_D3_v2"
-           }
-         # Grant users in the "devops" group view permission on the
-         # notebook results
-         access-control-list-json: >
-           [
-             {
-               "devops": "Can View",
-             }
-           ]
-       # Obtain an AAD token and use it to run the notebook on Databricks
-       # Note: If running on AWS or GCP, you can directly pass your service principal
-       # token via the databricks-host input instead
-     - name: Log into prod Azure
-       uses: Azure/login@v1
-       with:
-         creds: ${{ secrets.PROD_AZURE_CREDENTIALS }}
-     - name: Generate and save prod AAD token
-       run: |
-         echo "{DATABRICKS_TOKEN}={$(az account get-access-token | jq .accessToken)}" >> $GITHUB_ENV
-     - name: Trigger notebook in prod
-       uses: databricks/run-notebook@v0
-       with:
-         databricks-host: https://adb-prod.XX.azuredatabricks.net
-         databricks-token: ${{ secrets.DATABRICKS_PROD_WORKSPACE_API_TOKEN }}
-         local-notebook-path: notebooks/MainNotebook.py
-         # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
-         # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
-         # AWS or "n1-highmem-4" for GCP
-         new-cluster-json: >
-           {
-             "num_workers": 1,
-             "spark_version": "10.4.x-scala2.12",
-             "node_type_id": "Standard_D3_v2"
-           }
-         # Grant users in the "devops" group view permission on the
-         # notebook results
-         access-control-list-json: >
-           [
-             {
-               "devops": "Can View",
-             }
-           ]
-
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Trigger notebook in staging
+        uses: databricks/run-notebook@v0
+        with:
+          databricks-host: https://adb-staging.XX.azuredatabricks.net
+          databricks-token: ${{ secrets.DATABRICKS_STAGING_WORKSPACE_API_TOKEN }}
+          local-notebook-path: notebooks/MainNotebook.py
+          # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
+          # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
+          # AWS or "n1-highmem-4" for GCP
+          new-cluster-json: >
+            {
+              "num_workers": 1,
+              "spark_version": "10.4.x-scala2.12",
+              "node_type_id": "Standard_D3_v2"
+            }
+          # Grant users in the "devops" group view permission on the
+          # notebook results
+          access-control-list-json: >
+            [
+              {
+                "devops": "Can View",
+              }
+            ]
+      - name: Trigger notebook in prod
+        uses: databricks/run-notebook@v0
+        with:
+          databricks-host: https://adb-prod.XX.azuredatabricks.net
+          databricks-token: ${{ secrets.DATABRICKS_PROD_WORKSPACE_API_TOKEN }}
+          local-notebook-path: notebooks/MainNotebook.py
+          # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
+          # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
+          # AWS or "n1-highmem-4" for GCP
+          new-cluster-json: >
+            {
+              "num_workers": 1,
+              "spark_version": "10.4.x-scala2.12",
+              "node_type_id": "Standard_D3_v2"
+            }
+          # Grant users in the "devops" group view permission on the
+          # notebook results
+          access-control-list-json: >
+            [
+              {
+                "devops": "Can View",
+              }
+            ]
 ```
 
 # Troubleshooting
