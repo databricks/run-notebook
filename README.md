@@ -50,6 +50,8 @@ and [generate an API token](https://docs.databricks.com/dev-tools/api/latest/tok
 
 ## Azure
 For security reasons, we recommend using a Databricks service principal AAD token.
+
+### Create an Azure Service Principal
 You can:
 * Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 * Run `az login` to authenticate with Azure
@@ -60,15 +62,29 @@ You can:
   the `clientId` field from the JSON output of the previous step.
 * [Add your service principal](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/scim/scim-sp#add-service-principal) to your workspace. Use the
   `appId` output field of the previous step as the `applicationId` of the service principal in the `add-service-principal` payload.
-* At the start of your Workflow, use the [Azure/login Action](https://github.com/Azure/login) to authenticate to Azure
-  as your service principal, passing `${{ secrets.AZURE_CREDENTIALS }}` from the previous step.
-* In a following workflow step, run `echo "DATABRICKS_TOKEN=$(az account get-access-token --resource=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d --query accessToken -o tsv)" >> $GITHUB_ENV`
-  to create an AD token on behalf of the service principal and assign its value to the `DATABRICKS_TOKEN` environment variable. The
-  `databricks/run-notebook` Action will automatically detect and use the value in `DATABRICKS_TOKEN` to authenticate
-  to Databricks. Note: We pass into the `get-access-token` cli command the programmatic Azure Databricks id as `resourceId`.
-  This is necessary for authentication with your Azure Databricks workspace. Also note that the generated Azure token has a default life span of 60 minutes.
+* **Note**: The generated Azure token has a default life span of **60 minutes**.
   If you expect your Databricks notebook to take longer than 60 minutes to finish executing, then you must create a [token lifetime policy](https://docs.microsoft.com/en-us/azure/active-directory/develop/configure-token-lifetimes)
   and attach it to your service principal.
+
+### Use the Service Principal in your GitHub Workflow
+* Add the following steps to the start of your GitHub workflow.
+  This will create a new AAD token and save its value in the `DATABRICKS_TOKEN`
+  environment variable for use in subsequent steps.
+
+  ```yaml
+  # Obtain an AAD token and use it to run the notebook on Databricks
+  - name: Log into Azure
+    uses: Azure/login@v1
+    with:
+      creds: ${{ secrets.AZURE_CREDENTIALS }}
+  # Get an AAD token for the SP using the programmatic ID for Azure Databricks as resourceId.
+  - name: Generate and save AAD token
+    id: generate-token
+    run: |
+      echo "DATABRICKS_TOKEN=$(az account get-access-token \
+      --resource=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d \
+      --query accessToken -o tsv)" >> $GITHUB_ENV
+  ```
 
 ## GCP
 For security reasons, we recommend inviting a service user to your Databricks workspace and using their API token.
@@ -112,8 +128,10 @@ jobs:
         uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      # Get an AAD token for the SP using the programmatic ID for Azure Databricks as resourceId.
-      # Then setting the returned accessToken to env.DATABRICKS_TOKEN.
+      # Get an AAD token for the service principal,
+      # and store it in the DATABRICKS_TOKEN environment variable for use in subsequent steps.
+      # We set the `resource` parameter to the programmatic ID for Azure Databricks.
+      # See https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/aad/service-prin-aad-token#--get-an-azure-ad-access-token for details.
       - name: Generate and save AAD token
         id: generate-token
         run: |
@@ -180,8 +198,10 @@ jobs:
         uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      # Get an AAD token for the SP using the programmatic ID for Azure Databricks as resourceId.
-      # Then setting the returned accessToken to env.DATABRICKS_TOKEN.
+      # Get an AAD token for the service principal,
+      # and store it in the DATABRICKS_TOKEN environment variable for use in subsequent steps.
+      # We set the `resource` parameter to the programmatic ID for Azure Databricks.
+      # See https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/aad/service-prin-aad-token#--get-an-azure-ad-access-token for details.
       - name: Generate and save AAD token
         id: generate-token
         run: |
@@ -262,8 +282,10 @@ jobs:
         uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      # Get an AAD token for the SP using the programmatic ID for Azure Databricks as resourceId.
-      # Then setting the returned accessToken to env.DATABRICKS_TOKEN.
+      # Get an AAD token for the service principal,
+      # and store it in the DATABRICKS_TOKEN environment variable for use in subsequent steps.
+      # We set the `resource` parameter to the programmatic ID for Azure Databricks.
+      # See https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/aad/service-prin-aad-token#--get-an-azure-ad-access-token for details.
       - name: Generate and save AAD token
         id: generate-token
         run: |
@@ -320,8 +342,10 @@ jobs:
         uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_STAGING_CREDENTIALS }}
-      # Get an AAD token for the SP using the programmatic ID for Azure Databricks as resourceId.
-      # Then setting the returned accessToken to env.DATABRICKS_TOKEN.
+      # Get an AAD token for the service principal,
+      # and store it in the DATABRICKS_TOKEN environment variable for use in subsequent steps.
+      # We set the `resource` parameter to the programmatic ID for Azure Databricks.
+      # See https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/aad/service-prin-aad-token#--get-an-azure-ad-access-token for details.
       - name: Generate and save AAD token
         id: generate-token
         run: |
@@ -358,8 +382,10 @@ jobs:
         uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_PROD_CREDENTIALS }}
-      # Get an AAD token for the SP using the programmatic ID for Azure Databricks as resourceId.
-      # Then setting the returned accessToken to env.DATABRICKS_TOKEN.
+      # Get an AAD token for the service principal,
+      # and store it in the DATABRICKS_TOKEN environment variable for use in subsequent steps.
+      # We set the `resource` parameter to the programmatic ID for Azure Databricks.
+      # See https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/aad/service-prin-aad-token#--get-an-azure-ad-access-token for details.
       - name: Generate and save AAD token
         id: generate-token
         run: |
