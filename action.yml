@@ -102,7 +102,11 @@ inputs:
       The list must have elements of the form:
       email address for the user -> permission
       or group name -> permmision.
-      (e.g. [{"userName@example.com": "CanManage", "users": "CanView"}]
+      e.g.
+      [
+        {"user_name": "userName@example.com", "permission_level": "CAN_MANAGE"},
+        {"group_name": "users", "permission_level": "CAN_VIEW"}
+      ]
 
       Please refer to access_control_list at
       https://docs.databricks.com/dev-tools/api/latest/jobs.html#operation/JobsRunsSubmit
