@@ -158,7 +158,8 @@ jobs:
           access-control-list-json: >
             [
               {
-                "users": "Can View"
+                "group_name": "users",
+                "permission_level": "CAN_VIEW"
               }
             ]
 ```
@@ -245,7 +246,8 @@ jobs:
           access-control-list-json: >
             [
               {
-                "users": "Can View"
+                "group_name": "users",
+                "permission_level": "CAN_VIEW"
               }
             ]
 ```
@@ -311,7 +313,8 @@ jobs:
           access-control-list-json: >
             [
               {
-                "users": "Can View"
+                "group_name": "users",
+                "permission_level": "CAN_VIEW"
               }
             ]
 ```
@@ -372,7 +375,8 @@ jobs:
           access-control-list-json: >
             [
               {
-                "devops": "Can View"
+                "group_name": "devops",
+                "permission_level": "CAN_VIEW"
               }
             ]
       # Obtain an AAD token and use it to run the notebook on Databricks
@@ -412,7 +416,8 @@ jobs:
           access-control-list-json: >
             [
               {
-                "devops": "Can View"
+                "group_name": "devops",
+                "permission_level": "CAN_VIEW"
               }
             ]
 ```
