@@ -72,12 +72,10 @@ You can:
   environment variable for use in subsequent steps.
 
   ```yaml
-  # Obtain an AAD token and use it to run the notebook on Databricks
   - name: Log into Azure
     uses: Azure/login@v1
     with:
       creds: ${{ secrets.AZURE_CREDENTIALS }}
-  # Get an AAD token for the SP using the programmatic ID for Azure Databricks as resourceId.
   - name: Generate and save AAD token
     id: generate-token
     run: |
