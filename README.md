@@ -67,7 +67,7 @@ You can:
   `databricks/run-notebook` Action will automatically detect and use the value in `DATABRICKS_TOKEN` to authenticate
   to Databricks. Note: We pass into the `get-access-token` cli command the programmatic Azure Databricks id as `resourceId`.
   This is necessary for authentication with your Azure Databricks workspace. Also note that the generated Azure token has a default life span of 60 minutes.
-  If you expect your Databricks notebook to take longer than 60 minutes, then you must create a [token lifetime policy](https://docs.microsoft.com/en-us/azure/active-directory/develop/configure-token-lifetimes)
+  If you expect your Databricks notebook to take longer than 60 minutes to finish executing, then you must create a [token lifetime policy](https://docs.microsoft.com/en-us/azure/active-directory/develop/configure-token-lifetimes)
   and attach it to your service principal.
 
 ## GCP
