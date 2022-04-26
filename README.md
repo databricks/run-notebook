@@ -1,4 +1,4 @@
-# run-notebook v0
+# run-databricks-notebook v0
 
 # Overview
 Given a Databricks notebook and cluster specification, this Action runs the notebook as a one-time Databricks Job
@@ -137,7 +137,7 @@ jobs:
           --resource=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d \
           --query accessToken -o tsv)" >> $GITHUB_ENV
       - name: Trigger notebook from PR branch
-        uses: databricks/run-notebook@v0
+        uses: databricks/run-databricks-notebook@v0
         with:
           local-notebook-path: notebooks/MainNotebook.py
           databricks-token: ${{ env.DATABRICKS_TOKEN }}
@@ -221,7 +221,7 @@ jobs:
           local-path: dist/my-project.whl
         id: upload_wheel
       - name: Trigger model training notebook from PR branch
-        uses: databricks/run-notebook@v0
+        uses: databricks/run-databricks-notebook@v0
         with:
           local-notebook-path: notebooks/deployments/MainNotebook
           # Install the wheel built in the previous step as a library
@@ -293,7 +293,7 @@ jobs:
           --resource=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d \
           --query accessToken -o tsv)" >> $GITHUB_ENV
       - name: Trigger model training notebook from PR branch
-        uses: databricks/run-notebook@v0
+        uses: databricks/run-databricks-notebook@v0
         with:
           # Run our notebook against a remote repo
           local-notebook-path: notebooks/deployments/MainNotebook
@@ -319,7 +319,7 @@ jobs:
 
 ### Run notebooks in different Databricks Workspaces
 In this example, we supply the `databricks-host` and `databricks-token` inputs
-to each `run-notebook` step to trigger notebook execution against different workspaces.
+to each `run-databricks-notebook` step to trigger notebook execution against different workspaces.
 
 ```yaml
 name: Run a notebook in the current repo on pushes to main
@@ -354,7 +354,7 @@ jobs:
           --resource=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d \
           --query accessToken -o tsv)" >> $GITHUB_ENV
       - name: Trigger notebook in staging
-        uses: databricks/run-notebook@v0
+        uses: databricks/run-databricks-notebook@v0
         with:
           databricks-host: https://adb-staging.XX.azuredatabricks.net
           databricks-token: ${{ env.DATABRICKS_STAGING_TOKEN }}
@@ -395,7 +395,7 @@ jobs:
           --resource=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d \
           --query accessToken -o tsv)" >> $GITHUB_ENV
       - name: Trigger notebook in prod
-        uses: databricks/run-notebook@v0
+        uses: databricks/run-databricks-notebook@v0
         with:
           databricks-host: https://adb-prod.XX.azuredatabricks.net
           databricks-token: ${{ env.DATABRICKS_PROD_TOKEN }}
