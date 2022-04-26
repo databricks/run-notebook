@@ -21,7 +21,7 @@ export class ApiClient {
   async request(path: string, method: string, body: object): Promise<object> {
     const headers = {
       Authorization: `Bearer ${this.token}`,
-      'User-Agent': `databricks-github-action-run-notebook/${this.actionVerson}`,
+      'User-Agent': `databricks-github-action-run-databricks-notebook/${this.actionVerson}`,
       'Content-Type': 'text/json'
     }
     return httpRequest(this.host, path, method, headers, body)
