@@ -1,5 +1,6 @@
 import {readFileSync} from 'fs'
 
+
 describe(`action.yml unit tests`, () => {
   const yaml = require('js-yaml')
   test('yaml file compiles without errors', async () => {
