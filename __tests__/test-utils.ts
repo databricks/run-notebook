@@ -113,7 +113,7 @@ const getExpectedHeaders = (token: string) => {
   return {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'text/json',
-    'User-Agent': `databricks-github-action-run-databricks-notebook/${actionVersion}`
+    'User-Agent': `databricks-github-action-run-notebook/${actionVersion}`
   }
 }
 

@@ -1,4 +1,4 @@
-name: 'run-databricks-notebook'
+name: 'run-notebook'
 description: 'Triggers a one-time run of a Databricks notebook'
 author: 'Databricks'
 inputs:
