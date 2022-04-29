@@ -297,7 +297,7 @@ jobs:
         with:
           # Run our notebook against a remote repo
           local-notebook-path: notebooks/deployments/MainNotebook
-          git-commit: $GITHUB_SHA
+          git-commit: ${{ github.sha }}
           # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
           # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
           # AWS or "n1-highmem-4" for GCP
