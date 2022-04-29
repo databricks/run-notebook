@@ -34,7 +34,7 @@ class ApiClient {
         return __awaiter(this, void 0, void 0, function* () {
             const headers = {
                 Authorization: `Bearer ${this.token}`,
-                'User-Agent': `databricks-github-action-run-databricks-notebook/${this.actionVerson}`,
+                'User-Agent': `databricks-github-action-run-notebook/${this.actionVerson}`,
                 'Content-Type': 'text/json'
             };
             return (0, request_1.httpRequest)(this.host, path, method, headers, body);
