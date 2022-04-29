@@ -1,4 +1,4 @@
-# run-notebook v0
+# databricks/run-notebook v0
 
 # Overview
 Given a Databricks notebook and cluster specification, this Action runs the notebook as a one-time Databricks Job
@@ -319,7 +319,7 @@ jobs:
 
 ### Run notebooks in different Databricks Workspaces
 In this example, we supply the `databricks-host` and `databricks-token` inputs
-to each `run-notebook` step to trigger notebook execution against different workspaces.
+to each `databricks/run-notebook` step to trigger notebook execution against different workspaces.
 
 ```yaml
 name: Run a notebook in the current repo on pushes to main
