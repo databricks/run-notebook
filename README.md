@@ -30,14 +30,10 @@ against an existing cluster.
 [Azure](https://docs.microsoft.com/en-us/azure/databricks/security/access-control/workspace-acl#--folder-permissions) |
 [GCP](https://docs.gcp.databricks.com/security/access-control/workspace-acl.html#folder-permissions)):
   * If supplying `local-notebook-path` with one of the `git-commit`, `git-tag`, or `git-branch` parameters, no workspace
-    permissions are required. However, your principal must have Git integration configured
-    ([AWS](https://docs.databricks.com/repos/index.html#configure-your-git-integration-with-databricks) |
-    [Azure](https://docs.microsoft.com/en-us/azure/databricks/repos/#--configure-your-git-integration-with-azure-databricks) |
-    [GCP](https://docs.gcp.databricks.com/repos/index.html#configure-your-git-integration-with-databricks))
+    permissions are required. However, your principal must have Git integration configured ([AWS](https://docs.databricks.com/dev-tools/api/latest/gitcredentials.html#operation/create-git-credential) | [Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/gitcredentials) | [GCP](https://docs.gcp.databricks.com/dev-tools/api/latest/gitcredentials.html#operation/create-git-credential)). You can associate git credentials with your principal by creating a git credential entry using your principal's API token.
   * If supplying the `local-notebook-path` parameter, "Can manage" permissions on the directory specified by the
     `workspace-temp-dir` parameter (the `/tmp/databricks-github-actions` directory if `workspace-temp-dir` is unspecified).
   * If supplying the `workspace-notebook-path`  parameter, "Can read" permissions on the specified notebook.
-* Git credentials ([AWS](https://docs.databricks.com/dev-tools/api/latest/gitcredentials.html#operation/create-git-credential) | [Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/gitcredentials) | [GCP](https://docs.gcp.databricks.com/dev-tools/api/latest/gitcredentials.html#operation/create-git-credential)): associate git credentials with your principal by creating a git credential entry using your principal's API token.
 
 We recommend that you store the Databricks REST API token in [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 to pass it into your GitHub Workflow. The following section lists recommended approaches for token creation by cloud.
