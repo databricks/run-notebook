@@ -23,7 +23,7 @@ To use this Action, you need a Databricks REST API token to trigger notebook exe
 token must be associated with a principal with the following permissions:
 * Cluster permissions ([AWS](https://docs.databricks.com/security/access-control/cluster-acl.html#types-of-permissions) |
 [Azure](https://docs.microsoft.com/en-us/azure/databricks/security/access-control/cluster-acl#types-of-permissions) |
-[GCP](https://docs.gcp.databricks.com/security/access-control/cluster-acl.html)): Unrestricted cluster creation,
+[GCP](https://docs.gcp.databricks.com/security/access-control/cluster-acl.html)): Allow unrestricted cluster creation entitlement,
 if running the notebook against a new cluster (recommended), or "Can restart" permission, if running the notebook
 against an existing cluster.
 * Workspace permissions ([AWS](https://docs.databricks.com/security/access-control/workspace-acl.html#folder-permissions) |
@@ -37,6 +37,7 @@ against an existing cluster.
   * If supplying the `local-notebook-path` parameter, "Can manage" permissions on the directory specified by the
     `workspace-temp-dir` parameter (the `/tmp/databricks-github-actions` directory if `workspace-temp-dir` is unspecified).
   * If supplying the `workspace-notebook-path`  parameter, "Can read" permissions on the specified notebook.
+* Git credentials ([AWS](https://docs.databricks.com/dev-tools/api/latest/gitcredentials.html#operation/create-git-credential) | [Azure](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/gitcredentials) | [GCP](https://docs.gcp.databricks.com/dev-tools/api/latest/gitcredentials.html#operation/create-git-credential)): associate git credentials with your principal by creating a git credential entry using your principal's API token.
 
 We recommend that you store the Databricks REST API token in [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 to pass it into your GitHub Workflow. The following section lists recommended approaches for token creation by cloud.
