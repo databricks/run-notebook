@@ -38,6 +38,8 @@ against an existing cluster.
 We recommend that you store the Databricks REST API token in [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 to pass it into your GitHub Workflow. The following section lists recommended approaches for token creation by cloud.
 
+Note: we recommend that you do not run this Action against workspaces with IP restrictions. GitHub-hosted action runners have a [wide range of IP addresses](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#ip-addresses), making it difficult to whitelist.
+
 ## AWS
 For security reasons, we recommend creating and using a Databricks service principal API token. You can
 [create a service principal](https://docs.databricks.com/dev-tools/api/latest/scim/scim-sp.html#create-service-principal),
