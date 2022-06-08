@@ -144,7 +144,7 @@ jobs:
         with:
           local-notebook-path: notebooks/MainNotebook.py
           # Alternatively, specify an existing-cluster-id to run against an existing cluster.
-          # The cluter JSON below is for Azure Databricks. On AWS and GCP, set
+          # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
           # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
           # AWS or "n1-highmem-4" for GCP
           new-cluster-json: >
