@@ -1,0 +1,125 @@
+{
+  "id": "{{taskguid}}",
+  "name": "run-notebook",
+  "friendlyName": "Run Databricks Notebook",
+  "description": "Triggers a one-time run of a Databricks notebook",
+  "author": "Mohamad Atef Arabi",
+  "version": {
+    "Major": 0,
+    "Minor": 1,
+    "Patch": 0
+  },
+  "releaseNotes": "This is the first beta version of this custom task.",
+  "inputs": [
+    {
+      "name": "local-notebook-path",
+      "type": "string",
+      "required": false,
+      "helpMarkDown": "Note: either local-notebook-path or workspace-notebook-path must be specified.\n      Relative path to the notebook in the current Git repo, e.g. \"path/to/my_notebook.py\".\n      If specified, then the specified notebook at local path will be uploaded to a temporary\n      workspace directory under workspace-temp-dir and executed as a  one-time job."
+    },
+    {
+      "name": "workspace-notebook-path",
+      "type": "string",
+      "required": false,
+      "helpMarkDown": "Note: either local-notebook-path or workspace-notebook-path must be specified.\n      Absolute path in the Databricks workspace of an existing notebook to run, e.g.\n       \"/Users/john.doe@databricks.com/My Notebook\", \"/Repos/my-repo-name/notebooks/My Notebook\"."
+    },
+    {
+      "name": "databricks-host",
+      "type": "string",
+      "required": false,
+      "helpMarkDown": "Hostname of the Databricks workspace in which to run the notebook. If unspecified, the hostname\n      will be inferred from the DATABRICKS_HOST environment variable. Either this parameter or the\n      DATABRICKS_HOST environment variable must be set."
+    },
+    {
+      "name": "databricks-token",
+      "type": "string",
+      "required": false,
+      "helpMarkDown": "Databricks REST API token to use to run the notebook. If unspecified, the token\n      will be inferred from the DATABRICKS_TOKEN environment variable. Either this parameter or the\n      DATABRICKS_TOKEN environment variable must be set."
+    },
+    {
+      "name": "workspace-temp-dir",
+      "type": "string",
+      "defaultValue": "/tmp/databricks-github-actions",
+      "required": false,
+      "helpMarkDown": "Optional base directory in the workspace workspace under which to upload the local-notebook-path.\n      If specified, the Action will create a random subdirectory under the specified directory,\n      and upload the notebook immediately under the subdirectory.\n      For example, if /tmp/actions is specified along with a notebook path of\n      machine-learning/notebooks/my-notebook.py, the Action will upload to tmp/actions/<uuid>/my-notebook.py."
+    },
+    {
+      "name": "new-cluster-json",
+      "type": "multiLine",
+      "required": false,
+      "helpMarkDown": "Note: either existing-cluster-id or new-cluster-json must be specified.\n\n      JSON string describing the cluster on which to which execute the notebook. A new cluster\n      with the specified attributes will be launched to run the notebook. For example, on Azure\n      Databricks:\n      {\n          \"num_workers\": 1,\n          \"spark_version\": \"10.4.x-scala2.12\",\n          \"node_type_id\": \"Standard_D3_v2\"\n      }\n\n      On AWS:\n\n      {\n          \"num_workers\": 1,\n          \"spark_version\": \"10.4.x-scala2.12\",\n          \"node_type_id\": \"i3.xlarge\"\n      }\n\n      On GCP:\n\n      {\n          \"num_workers\": 1,\n          \"spark_version\": \"10.4.x-scala2.12\",\n          \"node_type_id\": \"n1-highmem-4\"\n      }\n\n\n      See docs for the \"new_cluster\" field in\n      https://docs.databricks.com/dev-tools/api/latest/jobs.html#operation/JobsRunsSubmit for more details\n      on how to specify this input."
+    },
+    {
+      "name": "existing-cluster-id",
+      "type": "string",
+      "required": false,
+      "helpMarkDown": " Note: either existing-cluster-id or new-cluster-json must be specified.\n\n      The string ID of an existing cluster on which to execute the notebook. We recommend\n      specifying new-cluster-json instead for greater reliability. See docs for\n      the \"existing_cluster_id\" field in\n      https://docs.databricks.com/dev-tools/api/latest/jobs.html#operation/JobsRunsSubmit for details."
+    },
+    {
+      "name": "libraries-json",
+      "type": "multiLine",
+      "required": false,
+      "helpMarkDown": "JSON string containing a list of libraries (e.g. [{\"pypi\": \"sklearn\"}, {\"pypi\": \"mlflow\"}]) to\n      be installed on the cluster that will execute the notebook as a job.\n\n      See docs at\n      https://docs.databricks.com/dev-tools/api/latest/libraries.html#library\n      for details on how to specify this input."
+    },
+    {
+      "name": "notebook-params-json",
+      "type": "multiLine",
+      "required": false,
+      "helpMarkDown": "JSON string containing a list of parameters (e.g. [{\"key\": \"...\", \"value\": \"...\"}]\n      passed to the notebook run.\n      See docs for the \"base_parameters\" field in\n      https://docs.databricks.com/dev-tools/api/latest/jobs.html#operation/JobsRunsSubmit\n      for details on how to specify this input."
+    },
+    {
+      "name": "access-control-list-json",
+      "type": "multiLine",
+      "required": false,
+      "helpMarkDown": "JSON string containing a list of permissions to set on the job.\n      The list must have elements of the form:\n      email address for the user -> permission\n      or group name -> permmision.\n      e.g.\n      [\n        {\"user_name\": \"userName@example.com\", \"permission_level\": \"CAN_MANAGE\"},\n        {\"group_name\": \"users\", \"permission_level\": \"CAN_VIEW\"}\n      ]\n\n      Please refer to access_control_list at\n      https://docs.databricks.com/dev-tools/api/latest/jobs.html#operation/JobsRunsSubmit\n      for details on how to configure this input."
+    },
+    {
+      "name": "timeout-seconds",
+      "type": "int",
+      "required": false,
+      "helpMarkDown": "Timeout, in seconds, for the one-time Databricks notebook job run.\n      If not specified, the Databricks job will continue to run\n      even if the current GitHub Workflow times out"
+    },
+    {
+      "name": "run-name",
+      "type": "string",
+      "required": false,
+      "helpMarkDown": "An optional name for the one-time notebook job run.\n      Please refer to run_name at\n            https://docs.databricks.com/dev-tools/api/latest/jobs.html#operation/JobsRunsSubmit\n            for details on how to configure this input."
+    },
+    {
+      "name": "git-repo-url",
+      "type": "string",
+      "required": false,
+      "helpMarkDown": "The git repository's url, this is required when specifying git-commit, git-branch, or git-tag."
+    },
+    {
+      "name": "git-commit",
+      "type": "string",
+      "required": false,
+      "helpMarkDown": "Note: this optional parameter is currently in private preview. Contact Databricks Support\n      to request access.\n \n      If specified, the notebook is run on Databricks within a temporary checkout of\n      the entire git repo at the specified git commit.\n      The local-notebook-path input must be specified when using this parameter, and you\n      must configure Git credentials (see https://docs.databricks.com/repos/index.html\n      #configure-your-git-integration-with-databricks).\n      This functionality can be useful for running a notebook that depends on other\n      files within the same repo (e.g imports Python modules within the same repo) or\n      that was developed using [Databricks Repos]\n      (https://docs.databricks.com/repos/index.html). For example, you can set\n      `git-commit` to `GITHUB_SHA` to run the notebook in the context of its enclosing\n      repo against the commit that triggered the current GitHub Workflow,\n      e.g. to run a notebook from the current PR branch.\n\n      Known limitation: The supplied `local-notebook-path` must be a Databricks notebook\n      exported as source via the UI (https://docs.databricks.com/notebooks/notebooks-manage.html#export-a-notebook)\n      or REST API (https://docs.databricks.com/dev-tools/api/latest/workspace.html#export),\n      rather than an arbitrary Python/Scala/R file."
+    },
+    {
+      "name": "git-branch",
+      "type": "string",
+      "required": false,
+      "helpMarkDown": "Note: this optional parameter is currently in private preview. Contact Databricks Support\n      to request access.\n\n      If specified, the notebook is run on Databricks within a temporary checkout of\n      the entire git repo at the specified git branch.\n      The local-notebook-path input must be specified when using this parameter, and you\n      must configure Git credentials (see https://docs.databricks.com/repos/index.html\n      #configure-your-git-integration-with-databricks).\n      This functionality can be useful for running a notebook that depends on other\n      files within the same repo (e.g imports Python modules within the same repo) or\n      that was developed using [Databricks Repos]\n      (https://docs.databricks.com/repos/index.html).\n\n      Known limitation: The supplied `local-notebook-path` must be a Databricks notebook\n      exported as source via the UI (https://docs.databricks.com/notebooks/notebooks-manage.html#export-a-notebook)\n      or REST API (https://docs.databricks.com/dev-tools/api/latest/workspace.html#export),\n      rather than an arbitrary Python/Scala/R file."
+    },
+    {
+      "name": "git-tag",
+      "type": "string",
+      "required": false,
+      "helpMarkDown": "Note: this optional parameter is currently in private preview. Contact Databricks Support\n      to request access.\n      If specified, the notebook is run on Databricks within a temporary checkout of\n      the entire git repo at the specified git tag.\n      The local-notebook-path input must be specified when using this parameter, and you\n      must configure Git credentials (see https://docs.databricks.com/repos/index.html\n      #configure-your-git-integration-with-databricks).\n      This functionality can be useful for running a notebook that depends on other\n      files within the same repo (e.g imports Python modules within the same repo) or\n      that was developed using [Databricks Repos]\n      (https://docs.databricks.com/repos/index.html).\n\n      Known limitation: The supplied `local-notebook-path` must be a Databricks notebook\n      exported as source via the UI (https://docs.databricks.com/notebooks/notebooks-manage.html#export-a-notebook)\n      or REST API (https://docs.databricks.com/dev-tools/api/latest/workspace.html#export),\n      rather than an arbitrary Python/Scala/R file."
+    }
+  ],
+  "instanceNameFormat": "Triggers a one-time run for $(local-notebook-path)$(workspace-notebook-path)",
+  "execution": {
+    "Node10": {
+      "target": "dist/main/index.js",
+      "argumentFormat": ""
+    }
+  },
+  "postjobexecution": {
+    "Node10": {
+      "target": "dist/post/index.js",
+      "argumentFormat": ""
+    }
+  }
+}

@@ -98,7 +98,7 @@ to pass into your GitHub Workflow.
   
 # Usage
 
-See [action.yml](action.yml) for the latest interface and docs.
+See [action.yml](buildandreleasetask/action.yml) for the latest interface and docs.
 
 ### Run a self-contained notebook
 The workflow below runs a self-contained notebook as a one-time job.

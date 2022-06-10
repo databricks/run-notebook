@@ -1,5 +1,5 @@
-import * as core from '@actions/core'
 import * as path from 'path'
+import * as tl from 'azure-pipelines-task-lib/task'
 import {DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY} from '../../common/src/constants'
 import {ApiClient} from '../../common/src/api-client'
 import {randomUUID} from 'crypto'
@@ -22,7 +22,7 @@ const importTmpNotebook0 = async (
   const tmpNotebookDirectory = getNotebookUploadDirectory(workspaceTempDir)
   const apiClient = new ApiClient(databricksHost, databricksToken)
   await apiClient.workspaceMkdirs(tmpNotebookDirectory)
-  core.saveState(
+  tl.setTaskVariable(
     DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY,
     tmpNotebookDirectory
   )
@@ -47,7 +47,7 @@ const importTmpNotebook = async (
     )
   } catch (error) {
     if (error instanceof Error) {
-      core.setFailed(error.message)
+      tl.setResult(tl.TaskResult.Failed, error.message);
     }
     throw error
   }

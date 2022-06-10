@@ -1,4 +1,4 @@
-import * as core from '@actions/core'
+import * as tl from "azure-pipelines-task-lib";
 import {ApiClient} from '../../common/src/api-client'
 import {JobRunOutput} from '../../common/src/interfaces'
 
@@ -29,7 +29,7 @@ export const runAndAwaitNotebook = async (
     return await apiClient.awaitJobAndGetOutput(triggeredJobRunId)
   } catch (error) {
     if (error instanceof Error) {
-      core.setFailed(error.message)
+      tl.setResult(tl.TaskResult.Failed, error.message)
     }
     throw error
   }

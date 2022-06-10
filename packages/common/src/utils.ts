@@ -1,8 +1,12 @@
-import * as core from '@actions/core'
+import * as tl from 'azure-pipelines-task-lib/task'
 import {isAbsolute} from 'path'
 
+export const getInputValue = (inputKey: string): string => {
+  return getInputValue(inputKey) || '';
+}
+
 export const getDatabricksHost = (): string => {
-  const hostFromInput = core.getInput('databricks-host')
+  const hostFromInput = getInputValue('databricks-host')
   const hostFromEnv = process.env['DATABRICKS_HOST'] || ''
 
   if (!hostFromInput && !hostFromEnv) {
@@ -16,7 +20,7 @@ export const getDatabricksHost = (): string => {
 }
 
 export const getWorkspaceTempDir = (): string => {
-  const res = core.getInput('workspace-temp-dir')
+  const res = getInputValue('workspace-temp-dir')
   if (!res.startsWith('/')) {
     throw new Error(
       `workspace-temp-dir input must be an absolute Databricks workspace path. Got invalid path ${res}`
@@ -26,7 +30,7 @@ export const getWorkspaceTempDir = (): string => {
 }
 
 export const getDatabricksToken = (): string => {
-  const tokenFromInput = core.getInput('databricks-token')
+  const tokenFromInput = getInputValue('databricks-token')
   const tokenFromEnv = process.env['DATABRICKS_TOKEN'] || ''
 
   if (!tokenFromInput && !tokenFromEnv) {
@@ -40,8 +44,8 @@ export const getDatabricksToken = (): string => {
 }
 
 export const getNotebookPath = (): string => {
-  const localNotebookPath: string = core.getInput('local-notebook-path')
-  const workspaceNotebookPath: string = core.getInput('workspace-notebook-path')
+  const localNotebookPath: string = getInputValue('local-notebook-path')
+  const workspaceNotebookPath: string = getInputValue('workspace-notebook-path')
 
   if (!localNotebookPath && !workspaceNotebookPath) {
     throw new Error(
@@ -75,8 +79,8 @@ export const getNotebookPath = (): string => {
 }
 
 export const getClusterSpec = (): object => {
-  const existingClusterId: string = core.getInput('existing-cluster-id')
-  const newClusterJsonString: string = core.getInput('new-cluster-json')
+  const existingClusterId: string = getInputValue('existing-cluster-id')
+  const newClusterJsonString: string = getInputValue('new-cluster-json')
 
   if (!newClusterJsonString && !existingClusterId) {
     throw new Error(
@@ -95,7 +99,7 @@ export const getClusterSpec = (): object => {
 }
 
 export const getLibrariesSpec = (): object => {
-  const librariesJsonString: string = core.getInput('libraries-json')
+  const librariesJsonString: string = getInputValue('libraries-json')
   return librariesJsonString
     ? {
         libraries: JSON.parse(librariesJsonString)
@@ -104,7 +108,7 @@ export const getLibrariesSpec = (): object => {
 }
 
 export const getNotebookParamsSpec = (): object => {
-  const paramsJsonString: string = core.getInput('notebook-params-json')
+  const paramsJsonString: string = getInputValue('notebook-params-json')
   return paramsJsonString
     ? {
         base_parameters: JSON.parse(paramsJsonString)
@@ -113,7 +117,7 @@ export const getNotebookParamsSpec = (): object => {
 }
 
 export const getAclSpec = (): object => {
-  const aclJsonString: string = core.getInput('access-control-list-json')
+  const aclJsonString: string = getInputValue('access-control-list-json')
   return aclJsonString
     ? {
         access_control_list: JSON.parse(aclJsonString)
@@ -122,7 +126,7 @@ export const getAclSpec = (): object => {
 }
 
 export const getTimeoutSpec = (): object => {
-  const timeoutInSeconds: string = core.getInput('timeout-seconds')
+  const timeoutInSeconds: string = getInputValue('timeout-seconds')
   return timeoutInSeconds
     ? {
         timeout_seconds: Number(timeoutInSeconds)
@@ -131,7 +135,7 @@ export const getTimeoutSpec = (): object => {
 }
 
 export const getRunNameSpec = (): object => {
-  const runName: string = core.getInput('run-name')
+  const runName: string = getInputValue('run-name')
   return runName
     ? {
         run_name: runName
@@ -140,13 +144,12 @@ export const getRunNameSpec = (): object => {
 }
 
 export const getGitSourceSpec = (): object => {
-  const gitBranch: string = core.getInput('git-branch')
-  const gitTag: string = core.getInput('git-tag')
-  const gitCommit: string = core.getInput('git-commit')
-  const githubServerUrl: string = process.env['GITHUB_SERVER_URL'] || ''
-  const githubRepo: string = process.env['GITHUB_REPOSITORY'] || ''
+  const gitBranch: string = getInputValue('git-branch')
+  const gitTag: string = getInputValue('git-tag')
+  const gitCommit: string = getInputValue('git-commit')
+  const gitRepoUrl: string = getInputValue('git-repo-url')
   const baseGitSourceSpec = {
-    git_url: `${githubServerUrl}/${githubRepo}`,
+    git_url: gitRepoUrl,
     git_provider: 'github'
   }
 
@@ -181,9 +184,9 @@ export const getGitSourceSpec = (): object => {
 }
 
 export const isGitRefSpecified = (): boolean => {
-  const gitBranch: string = core.getInput('git-branch')
-  const gitTag: string = core.getInput('git-tag')
-  const gitCommit: string = core.getInput('git-commit')
+  const gitBranch: string = getInputValue('git-branch')
+  const gitTag: string = getInputValue('git-tag')
+  const gitCommit: string = getInputValue('git-commit')
   return gitBranch !== '' || gitTag !== '' || gitCommit !== ''
 }
 
@@ -194,18 +197,13 @@ export const runStepAndHandleFailure = async (
     await runStep()
   } catch (error) {
     if (error instanceof Error) {
-      core.setFailed(error.message)
+      tl.setResult(tl.TaskResult.Failed, error.message);
     }
     throw error
   }
 }
 
-export const debugLogging = (logStatement: string): void => {
-  if (core.isDebug()) {
-    core.debug(logStatement)
-  }
-}
-
 export const logJobRunUrl = (jobRunUrl: string, jobRunStatus: string): void => {
-  core.info(`Notebook run has status ${jobRunStatus}. URL: ${jobRunUrl}`)
+  // Note: For Azure custom pipeline, console.log() is used to log info.
+  console.log(`Notebook run has status ${jobRunStatus}. URL: ${jobRunUrl}`)
 }

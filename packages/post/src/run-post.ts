@@ -1,4 +1,4 @@
-import * as core from '@actions/core'
+import * as tl from 'azure-pipelines-task-lib/task'
 import {deleteTmpNotebooks} from './delete-tmp-notebook'
 import {DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY} from '../../common/src/constants'
 import {
@@ -8,7 +8,7 @@ import {
 } from '../../common/src/utils'
 
 async function runPostHelper(): Promise<void> {
-  const tmpNotebookDirectory = core.getState(
+  const tmpNotebookDirectory = tl.getTaskVariable(
     DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY
   )
   if (tmpNotebookDirectory) {

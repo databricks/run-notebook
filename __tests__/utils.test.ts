@@ -1,8 +1,6 @@
 import * as utils from '../packages/common/src/utils'
 import {
-  getDebugMock,
   getInfoMock,
-  getIsDebugMock,
   getSetFailedMock
 } from './test-utils'
 
@@ -416,21 +414,6 @@ describe('utils unit tests', () => {
       await utils.runStepAndHandleFailure(mockStepToRun)
     }).rejects.toThrow(new Error('step failed'))
     expect(getSetFailedMock()).toBeCalledWith('step failed')
-  })
-
-  test('debugLogging does not logs debug statement if debug is disabled', async () => {
-    getIsDebugMock().mockImplementation(() => false)
-
-    utils.debugLogging('This statement will not get logged')
-    expect(getDebugMock()).toBeCalledTimes(0)
-  })
-
-  test('debugLogging logs debug statement if debug is enabled', async () => {
-    getIsDebugMock().mockImplementation(() => true)
-
-    utils.debugLogging('This statement will get logged')
-
-    expect(getDebugMock()).toBeCalledWith('This statement will get logged')
   })
 
   test('logJobRunUrl logs job run url', async () => {

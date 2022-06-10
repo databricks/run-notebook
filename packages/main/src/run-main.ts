@@ -1,4 +1,4 @@
-import * as core from '@actions/core'
+import * as tl from 'azure-pipelines-task-lib/task'
 import {runAndAwaitNotebook} from './run-notebook'
 import {
   DATABRICKS_RUN_NOTEBOOK_OUTPUT_KEY,
@@ -31,7 +31,7 @@ async function runHelper(): Promise<void> {
     workspaceTempDir
   )
   if (tmpNotebookDirectory) {
-    core.saveState(
+    tl.setTaskVariable(
       DATABRICKS_TMP_NOTEBOOK_UPLOAD_DIR_STATE_KEY,
       tmpNotebookDirectory
     )
@@ -49,16 +49,20 @@ async function runHelper(): Promise<void> {
     runNameSpec,
     gitSourceSpec
   )
-  core.setOutput(
+  tl.setVariable(
     DATABRICKS_RUN_NOTEBOOK_OUTPUT_KEY,
-    runOutput.notebookOutput.result
+    runOutput.notebookOutput.result,
+    false,
+    true
   )
-  core.setOutput(
+  tl.setVariable(
     DATABRICKS_OUTPUT_TRUNCATED_KEY,
-    runOutput.notebookOutput.truncated
+    String(runOutput.notebookOutput.truncated),
+    false,
+    true
   )
-  core.setOutput(DATABRICKS_RUN_ID_KEY, runOutput.runId)
-  core.setOutput(DATABRICKS_RUN_URL_KEY, runOutput.runUrl)
+  tl.setVariable(DATABRICKS_RUN_ID_KEY, String(runOutput.runId), false, true)
+  tl.setVariable(DATABRICKS_RUN_URL_KEY, runOutput.runUrl, false, true)
 }
 
 export async function runMain(): Promise<void> {

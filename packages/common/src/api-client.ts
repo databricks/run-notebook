@@ -1,5 +1,5 @@
 import {GET_JOB_STATUS_POLL_INTERVAL_SECS, JOB_RUN_TASK_KEY} from './constants'
-import {debugLogging, logJobRunUrl} from './utils'
+import {logJobRunUrl} from './utils'
 import {Buffer} from 'buffer'
 import {JobRunOutput} from './interfaces'
 import {extname} from 'path'
@@ -55,10 +55,6 @@ export class ApiClient {
       ...runNameSpec,
       ...gitSourceSpec
     }
-
-    debugLogging(
-      `The job spec input to runs/submit is: ${JSON.stringify(requestBody)}`
-    )
 
     const response = (await this.request(
       '/api/2.1/jobs/runs/submit',
