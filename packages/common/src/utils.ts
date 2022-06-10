@@ -2,7 +2,7 @@ import * as tl from 'azure-pipelines-task-lib/task'
 import {isAbsolute} from 'path'
 
 export const getInputValue = (inputKey: string): string => {
-  return getInputValue(inputKey) || '';
+  return getInputValue(inputKey) || ''
 }
 
 export const getDatabricksHost = (): string => {
@@ -197,7 +197,7 @@ export const runStepAndHandleFailure = async (
     await runStep()
   } catch (error) {
     if (error instanceof Error) {
-      tl.setResult(tl.TaskResult.Failed, error.message);
+      tl.setResult(tl.TaskResult.Failed, error.message)
     }
     throw error
   }

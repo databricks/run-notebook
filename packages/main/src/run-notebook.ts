@@ -1,4 +1,4 @@
-import * as tl from "azure-pipelines-task-lib";
+import * as tl from 'azure-pipelines-task-lib'
 import {ApiClient} from '../../common/src/api-client'
 import {JobRunOutput} from '../../common/src/interfaces'
 

@@ -47,7 +47,7 @@ const importTmpNotebook = async (
     )
   } catch (error) {
     if (error instanceof Error) {
-      tl.setResult(tl.TaskResult.Failed, error.message);
+      tl.setResult(tl.TaskResult.Failed, error.message)
     }
     throw error
   }
