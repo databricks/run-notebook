@@ -249,8 +249,6 @@ jobs:
 ```
 
 ### Run notebook within a temporary checkout of the current Repo
-**Note**: This feature is in private preview. Please reach out to Databricks Support to request access.
-
 The workflow below runs a notebook within a temporary repo checkout, enabled by
 specifying the  `git-commit`, `git-branch`, or `git-tag` parameter. You can use this to run notebooks that
 depend on other notebooks or files (e.g. Python modules in `.py` files) within the same repo.
