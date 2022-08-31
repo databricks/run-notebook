@@ -100,6 +100,67 @@ to pass into your GitHub Workflow.
 
 See [action.yml](action.yml) for the latest interface and docs.
 
+### Run notebook within a temporary checkout of the current Repo
+The workflow below runs a notebook as a one-time job within a temporary repo checkout, enabled by
+specifying the  `git-commit`, `git-branch`, or `git-tag` parameter. You can use this to run notebooks that
+depend on other notebooks or files (e.g. Python modules in `.py` files) within the same repo.
+
+```yaml
+name: Run a notebook within its repo on PRs
+
+on:
+  pull_request
+
+env:
+  DATABRICKS_HOST: https://adb-XXXX.XX.azuredatabricks.net
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checks out the repo
+        uses: actions/checkout@v2
+      # The step below does the following:
+      # 1. Sends a POST request to generate an Azure Active Directory token for an Azure service principal
+      # 2. Parses the token from the request response and then saves that in as DATABRICKS_TOKEN in the
+      # GitHub enviornment.
+      # Note: if the API request fails, the request response json will not have an "access_token" field and
+      # the DATABRICKS_TOKEN env variable will be empty.
+      - name: Generate and save AAD Token
+        run: |
+          echo "DATABRICKS_TOKEN=$(curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
+            https://login.microsoftonline.com/${{ secrets.AZURE_SP_TENANT_ID }}/oauth2/v2.0/token \
+            -d 'client_id=${{ secrets.AZURE_SP_APPLICATION_ID }}' \
+            -d 'grant_type=client_credentials' \
+            -d 'scope=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d%2F.default' \
+            -d 'client_secret=${{ secrets.AZURE_SP_CLIENT_SECRET }}' |  jq -r  '.access_token')" >> $GITHUB_ENV
+      - name: Trigger model training notebook from PR branch
+        uses: databricks/run-notebook@v0
+        with:
+          # Run our notebook against a remote repo
+          local-notebook-path: notebooks/deployments/MainNotebook
+          # If this is triggered from a PR use the PR's head commit, otherwise use github.sha.
+          git-commit: ${{ github.event.pull_request.head.sha || github.sha }}
+          # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
+          # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
+          # AWS or "n1-highmem-4" for GCP
+          new-cluster-json: >
+            {
+              "num_workers": 1,
+              "spark_version": "10.4.x-scala2.12",
+              "node_type_id": "Standard_D3_v2"
+            }
+          # Grant all users view permission on the notebook results
+          access-control-list-json: >
+            [
+              {
+                "group_name": "users",
+                "permission_level": "CAN_VIEW"
+              }
+            ]
+```
+
 ### Run a self-contained notebook
 The workflow below runs a self-contained notebook as a one-time job.
 
@@ -229,70 +290,6 @@ jobs:
               { "whl": "${{ steps.upload_wheel.outputs.dbfs-file-path }}" },
               { "pypi": "mlflow" }
             ]
-          # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
-          # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
-          # AWS or "n1-highmem-4" for GCP
-          new-cluster-json: >
-            {
-              "num_workers": 1,
-              "spark_version": "10.4.x-scala2.12",
-              "node_type_id": "Standard_D3_v2"
-            }
-          # Grant all users view permission on the notebook results
-          access-control-list-json: >
-            [
-              {
-                "group_name": "users",
-                "permission_level": "CAN_VIEW"
-              }
-            ]
-```
-
-### Run notebook within a temporary checkout of the current Repo
-**Note**: This feature is in private preview. Please reach out to Databricks Support to request access.
-
-The workflow below runs a notebook within a temporary repo checkout, enabled by
-specifying the  `git-commit`, `git-branch`, or `git-tag` parameter. You can use this to run notebooks that
-depend on other notebooks or files (e.g. Python modules in `.py` files) within the same repo.
-In the future, this will be our recommended approach for running notebooks using library dependencies in the
-current repo.
-
-```yaml
-name: Run a notebook within its repo on PRs
-
-on:
-  pull_request
-
-env:
-  DATABRICKS_HOST: https://adb-XXXX.XX.azuredatabricks.net
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checks out the repo
-        uses: actions/checkout@v2
-      # The step below does the following:
-      # 1. Sends a POST request to generate an Azure Active Directory token for an Azure service principal
-      # 2. Parses the token from the request response and then saves that in as DATABRICKS_TOKEN in the
-      # GitHub enviornment.
-      # Note: if the API request fails, the request response json will not have an "access_token" field and
-      # the DATABRICKS_TOKEN env variable will be empty.
-      - name: Generate and save AAD Token
-        run: |
-          echo "DATABRICKS_TOKEN=$(curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
-            https://login.microsoftonline.com/${{ secrets.AZURE_SP_TENANT_ID }}/oauth2/v2.0/token \
-            -d 'client_id=${{ secrets.AZURE_SP_APPLICATION_ID }}' \
-            -d 'grant_type=client_credentials' \
-            -d 'scope=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d%2F.default' \
-            -d 'client_secret=${{ secrets.AZURE_SP_CLIENT_SECRET }}' |  jq -r  '.access_token')" >> $GITHUB_ENV
-      - name: Trigger model training notebook from PR branch
-        uses: databricks/run-notebook@v0
-        with:
-          # Run our notebook against a remote repo
-          local-notebook-path: notebooks/deployments/MainNotebook
-          git-commit: ${{ github.sha }}
           # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
           # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
           # AWS or "n1-highmem-4" for GCP
