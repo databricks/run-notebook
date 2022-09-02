@@ -100,7 +100,7 @@ to pass into your GitHub Workflow.
 
 See [action.yml](action.yml) for the latest interface and docs.
 
-### Run notebook within a temporary checkout of the current Repo
+### (Recommended) Run notebook within a temporary checkout of the current Repo
 The workflow below runs a notebook as a one-time job within a temporary repo checkout, enabled by
 specifying the  `git-commit`, `git-branch`, or `git-tag` parameter. You can use this to run notebooks that
 depend on other notebooks or files (e.g. Python modules in `.py` files) within the same repo.
@@ -138,9 +138,8 @@ jobs:
       - name: Trigger model training notebook from PR branch
         uses: databricks/run-notebook@v0
         with:
-          # Run our notebook against a remote repo
           local-notebook-path: notebooks/deployments/MainNotebook
-          # If this is triggered from a PR use the PR's head commit, otherwise use github.sha.
+          # If the current workflow is triggered from a PR, run notebook code from the PR's head commit, otherwise use github.sha.
           git-commit: ${{ github.event.pull_request.head.sha || github.sha }}
           # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
           # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
