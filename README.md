@@ -139,7 +139,8 @@ jobs:
         uses: databricks/run-notebook@v0
         with:
           local-notebook-path: notebooks/deployments/MainNotebook
-          # If the current workflow is triggered from a PR, run notebook code from the PR's head commit, otherwise use github.sha.
+          # If the current workflow is triggered from a PR, 
+          # run notebook code from the PR's head commit, otherwise use github.sha.
           git-commit: ${{ github.event.pull_request.head.sha || github.sha }}
           # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
           # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
