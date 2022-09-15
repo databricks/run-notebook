@@ -12,6 +12,7 @@ run (docs:
 - optionally triggering the Databricks job run with a timeout
 - optionally using a Databricks job run name
 - setting the notebook output,
+
   job run ID, and job run page URL as Action output
 - failing if the Databricks job run fails
 
@@ -205,7 +206,7 @@ jobs:
         with:
           local-notebook-path: notebooks/MainNotebook.py
           # Alternatively, specify an existing-cluster-id to run against an existing cluster.
-          # The cluter JSON below is for Azure Databricks. On AWS and GCP, set
+          # The cluster JSON below is for Azure Databricks. On AWS and GCP, set
           # node_type_id to an appropriate node type, e.g. "i3.xlarge" for
           # AWS or "n1-highmem-4" for GCP
           new-cluster-json: >
