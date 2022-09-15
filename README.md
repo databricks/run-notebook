@@ -12,7 +12,6 @@ run (docs:
 - optionally triggering the Databricks job run with a timeout
 - optionally using a Databricks job run name
 - setting the notebook output,
-
   job run ID, and job run page URL as Action output
 - failing if the Databricks job run fails
 
