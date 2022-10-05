@@ -127,9 +127,6 @@ inputs:
     required: false
   git-commit:
     description: >
-      Note: this optional parameter is currently in private preview. Contact Databricks Support
-      to request access.
- 
       If specified, the notebook is run on Databricks within a temporary checkout of
       the entire git repo at the specified git commit.
       The local-notebook-path input must be specified when using this parameter, and you
@@ -150,9 +147,6 @@ inputs:
     required: false
   git-branch:
     description: >
-      Note: this optional parameter is currently in private preview. Contact Databricks Support
-      to request access.
-
       If specified, the notebook is run on Databricks within a temporary checkout of
       the entire git repo at the specified git branch.
       The local-notebook-path input must be specified when using this parameter, and you
@@ -170,8 +164,6 @@ inputs:
     required: false
   git-tag:
     description: >
-      Note: this optional parameter is currently in private preview. Contact Databricks Support
-      to request access.
       If specified, the notebook is run on Databricks within a temporary checkout of
       the entire git repo at the specified git tag.
       The local-notebook-path input must be specified when using this parameter, and you
