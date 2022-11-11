@@ -320,11 +320,13 @@ describe(`input utils`, () => {
     beforeEach(() => {
       process.env['GITHUB_SERVER_URL'] = 'https://my-git.com'
       process.env['GITHUB_REPOSITORY'] = 'dummyOwner/dummyRepo'
+      process.env['INPUT_GIT-PROVIDER'] = 'gitHub'
     })
     afterEach(() => {
       delete process.env['INPUT_GIT-BRANCH']
       delete process.env['INPUT_GIT-TAG']
       delete process.env['INPUT_GIT-COMMIT']
+      delete process.env['INPUT_GIT-PROVIDER']
       delete process.env['GITHUB_SERVER_URL']
       delete process.env['GITHUB_REPOSITORY']
     })
@@ -375,6 +377,21 @@ describe(`input utils`, () => {
           git_commit: expectedCommit,
           git_url: 'https://my-git.com/dummyOwner/dummyRepo',
           git_provider: 'github'
+        }
+      })
+    })
+
+    test('git_provider is set in getGitSourceSpec correctly if non-default provider is passed as input', async () => {
+      var expectedCommit = 'my-commit'
+      var expectedProvider = 'gitHubEnterprise'
+      process.env['INPUT_GIT-COMMIT'] = expectedCommit
+      process.env['INPUT_GIT-PROVIDER'] = expectedProvider
+
+      expect(utils.getGitSourceSpec()).toEqual({
+        git_source: {
+          git_commit: expectedCommit,
+          git_url: 'https://my-git.com/dummyOwner/dummyRepo',
+          git_provider: expectedProvider
         }
       })
     })

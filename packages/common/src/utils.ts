@@ -143,11 +143,12 @@ export const getGitSourceSpec = (): object => {
   const gitBranch: string = core.getInput('git-branch')
   const gitTag: string = core.getInput('git-tag')
   const gitCommit: string = core.getInput('git-commit')
+  const gitProvider: string = core.getInput('git-provider')
   const githubServerUrl: string = process.env['GITHUB_SERVER_URL'] || ''
   const githubRepo: string = process.env['GITHUB_REPOSITORY'] || ''
   const baseGitSourceSpec = {
     git_url: `${githubServerUrl}/${githubRepo}`,
-    git_provider: 'github'
+    git_provider: gitProvider
   }
 
   if (!isGitRefSpecified()) {
