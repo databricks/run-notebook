@@ -352,7 +352,7 @@ describe(`input utils`, () => {
         git_source: {
           git_tag: expectedTag,
           git_url: 'https://my-git.com/dummyOwner/dummyRepo',
-          git_provider: 'github'
+          git_provider: 'gitHub'
         }
       })
     })
@@ -364,7 +364,7 @@ describe(`input utils`, () => {
         git_source: {
           git_branch: expectedBranch,
           git_url: 'https://my-git.com/dummyOwner/dummyRepo',
-          git_provider: 'github'
+          git_provider: 'gitHub'
         }
       })
     })
@@ -376,7 +376,7 @@ describe(`input utils`, () => {
         git_source: {
           git_commit: expectedCommit,
           git_url: 'https://my-git.com/dummyOwner/dummyRepo',
-          git_provider: 'github'
+          git_provider: 'gitHub'
         }
       })
     })

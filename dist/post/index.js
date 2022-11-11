@@ -400,11 +400,12 @@ const getGitSourceSpec = () => {
     const gitBranch = core.getInput('git-branch');
     const gitTag = core.getInput('git-tag');
     const gitCommit = core.getInput('git-commit');
+    const gitProvider = core.getInput('git-provider');
     const githubServerUrl = process.env['GITHUB_SERVER_URL'] || '';
     const githubRepo = process.env['GITHUB_REPOSITORY'] || '';
     const baseGitSourceSpec = {
         git_url: `${githubServerUrl}/${githubRepo}`,
-        git_provider: 'github'
+        git_provider: gitProvider
     };
     if (!(0, exports.isGitRefSpecified)()) {
         return {};
@@ -2103,7 +2104,7 @@ exports.debug = debug; // for test
 /***/ ((module) => {
 
 "use strict";
-module.exports = {"i8":"0.0.0"};
+module.exports = {"i8":"0.0.2"};
 
 /***/ }),
 

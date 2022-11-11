@@ -234,13 +234,14 @@ describe(`main's runner integration tests`, () => {
     const dummyGitRepoName = 'dummyOwner/dummyRepo'
     const dummyGitServerUrl = 'github.com'
     const dummyGitCommit = 'sha1234'
+    const githubProvider = 'github'
     const expectedRunName = 'My python-notebook run'
     const dummyRunId = 123
     const dummyTaskRunId = 456
     const dummyRunUrl = 'databricks.com/url/to/job/run/'
     const expectedGitSourceSpec = {
       git_url: `${dummyGitServerUrl}/${dummyGitRepoName}`,
-      git_provider: 'github',
+      git_provider: githubProvider,
       git_commit: dummyGitCommit
     }
     const expectedParamsSpec = {
@@ -307,6 +308,7 @@ describe(`main's runner integration tests`, () => {
     process.env['INPUT_DATABRICKS-TOKEN'] = TOKEN
     process.env['INPUT_LOCAL-NOTEBOOK-PATH'] = notebookPath
     process.env['INPUT_GIT-COMMIT'] = dummyGitCommit
+    process.env['INPUT_GIT-PROVIDER'] = githubProvider
 
     process.env['INPUT_DATABRICKS-HOST'] = DATABRICKS_HOST
     process.env['INPUT_DATABRICKS-TOKEN'] = TOKEN
