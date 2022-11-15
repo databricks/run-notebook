@@ -179,6 +179,17 @@ inputs:
       or REST API (https://docs.databricks.com/dev-tools/api/latest/workspace.html#export),
       rather than an arbitrary Python/Scala/R file.
     required: false
+  git-provider:
+    description: >
+      If specified, the notebook is run on Databricks within a temporary checkout of
+      the entire git repo using the specified git provider.
+      The local-notebook-path input as well as one of git-tag, git-commit, or git-branch must be specified when using this parameter,
+      and you must configure Git credentials (see https://docs.databricks.com/repos/index.html
+      #configure-your-git-integration-with-databricks).
+      The default value for this input is 'gitHub', but if the repository is hosted in Github enterprise
+      then one can specify 'gitHubEnterprise'.
+    required: false
+    default: 'gitHub'
 outputs:
   notebook-output:
     description: >
