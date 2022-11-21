@@ -8,6 +8,11 @@ inputs:
       Relative path to the notebook in the current Git repo, e.g. "path/to/my_notebook.py".
       If specified, then the specified notebook at local path will be uploaded to a temporary
       workspace directory under workspace-temp-dir and executed as a  one-time job.
+      
+      Known limitation: When used with `git-commit`, `git-branch` or `git-tag`, the supplied `local-notebook-path` 
+      must be a Databricks notebook exported as source via the UI (https://docs.databricks.com/notebooks/notebooks-manage.html#export-a-notebook)
+      or REST API (https://docs.databricks.com/dev-tools/api/latest/workspace.html#export),
+      rather than an arbitrary Python/Scala/R file.
     required: false
   workspace-notebook-path:
     description: >
