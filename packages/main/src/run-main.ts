@@ -49,6 +49,10 @@ async function runHelper(): Promise<void> {
     runNameSpec,
     gitSourceSpec
   )
+  if (utils.shouldCommentToPr()) {
+    await utils.commentToPr(runOutput.notebookOutput.result)
+  }
+
   core.setOutput(
     DATABRICKS_RUN_NOTEBOOK_OUTPUT_KEY,
     runOutput.notebookOutput.result

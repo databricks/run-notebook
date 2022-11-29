@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 import {isAbsolute} from 'path'
 
 export const getDatabricksHost = (): string => {
@@ -209,4 +210,31 @@ export const debugLogging = (logStatement: string): void => {
 
 export const logJobRunUrl = (jobRunUrl: string, jobRunStatus: string): void => {
   core.info(`Notebook run has status ${jobRunStatus}. URL: ${jobRunUrl}`)
+}
+
+export const commentToPr = async (notebookResult: string): Promise<void> => {
+  try {
+    const githubToken: string = core.getInput('pr-github-token')
+    const octokit = github.getOctokit(githubToken)
+    const githubContext = github.context
+    await octokit.rest.issues.createComment({
+      issue_number: githubContext.issue.number,
+      owner: githubContext.repo.owner,
+      repo: githubContext.repo.repo,
+      body: notebookResult
+    })
+  } catch (error) {
+    if (error instanceof Error) {
+      core.warning(
+        `Attempted to add notebook run result as a PR comment. Failed due to: ${error.message}`
+      )
+    }
+  }
+}
+
+export const shouldCommentToPr = (): boolean => {
+  const shouldAddComment: string = core.getInput('add-pr-comment')
+  const githubToken: string = core.getInput('github-token') || ''
+
+  return githubToken !== '' && shouldAddComment === 'true'
 }
