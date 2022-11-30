@@ -195,6 +195,7 @@ inputs:
       The Github Token for the repo that will be used to add a comment to the PR.
       The comment will consist of the output of the notebook.
       If the token is not provided there will be no attempt to comment on the PR.
+      To use the default github token provided, just set the value of this input to the env variable 'github.token'.
     required: false
 outputs:
   notebook-output:
