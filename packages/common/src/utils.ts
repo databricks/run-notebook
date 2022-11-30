@@ -214,7 +214,7 @@ export const logJobRunUrl = (jobRunUrl: string, jobRunStatus: string): void => {
 
 export const commentToPr = async (
   notebookResult: string,
-  runId: number,
+  notebookPath: string,
   runUrl: string
 ): Promise<void> => {
   try {
@@ -224,8 +224,8 @@ export const commentToPr = async (
     const octokit = github.getOctokit(prCommentGithubToken)
     const githubContext = github.context
     const body = `### run-notebook github action results:
-#### Notebook run id: 
-${runId}
+#### Notebook path: 
+${notebookPath}
 #### Notebook run url: 
 ${runUrl}
 #### Notebook Output:

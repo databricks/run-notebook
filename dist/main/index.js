@@ -460,14 +460,14 @@ const logJobRunUrl = (jobRunUrl, jobRunStatus) => {
     core.info(`Notebook run has status ${jobRunStatus}. URL: ${jobRunUrl}`);
 };
 exports.logJobRunUrl = logJobRunUrl;
-const commentToPr = (notebookResult, runId, runUrl) => __awaiter(void 0, void 0, void 0, function* () {
+const commentToPr = (notebookResult, notebookPath, runUrl) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const prCommentGithubToken = core.getInput('pr-comment-github-token');
         const octokit = github.getOctokit(prCommentGithubToken);
         const githubContext = github.context;
         const body = `### run-notebook github action results:
-#### Notebook run id: 
-${runId}
+#### Notebook path: 
+${notebookPath}
 #### Notebook run url: 
 ${runUrl}
 #### Notebook Output:
@@ -633,7 +633,7 @@ function runHelper() {
         }
         const runOutput = yield (0, run_notebook_1.runAndAwaitNotebook)(databricksHost, databricksToken, notebookPath, clusterSpec, librariesSpec, notebookParamsSpec, aclSpec, timeoutSpec, runNameSpec, gitSourceSpec);
         if (utils.shouldCommentToPr()) {
-            yield utils.commentToPr(runOutput.notebookOutput.result, runOutput.runId, runOutput.runUrl);
+            yield utils.commentToPr(runOutput.notebookOutput.result, nbPath, runOutput.runUrl);
         }
         core.setOutput(constants_1.DATABRICKS_RUN_NOTEBOOK_OUTPUT_KEY, runOutput.notebookOutput.result);
         core.setOutput(constants_1.DATABRICKS_OUTPUT_TRUNCATED_KEY, runOutput.notebookOutput.truncated);

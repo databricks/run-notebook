@@ -52,7 +52,7 @@ async function runHelper(): Promise<void> {
   if (utils.shouldCommentToPr()) {
     await utils.commentToPr(
       runOutput.notebookOutput.result,
-      runOutput.runId,
+      nbPath,
       runOutput.runUrl
     )
   }

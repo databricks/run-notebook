@@ -460,14 +460,14 @@ const logJobRunUrl = (jobRunUrl, jobRunStatus) => {
     core.info(`Notebook run has status ${jobRunStatus}. URL: ${jobRunUrl}`);
 };
 exports.logJobRunUrl = logJobRunUrl;
-const commentToPr = (notebookResult, runId, runUrl) => __awaiter(void 0, void 0, void 0, function* () {
+const commentToPr = (notebookResult, notebookPath, runUrl) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const prCommentGithubToken = core.getInput('pr-comment-github-token');
         const octokit = github.getOctokit(prCommentGithubToken);
         const githubContext = github.context;
         const body = `### run-notebook github action results:
-#### Notebook run id: 
-${runId}
+#### Notebook path: 
+${notebookPath}
 #### Notebook run url: 
 ${runUrl}
 #### Notebook Output:
