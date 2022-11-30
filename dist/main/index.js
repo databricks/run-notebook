@@ -461,22 +461,15 @@ const logJobRunUrl = (jobRunUrl, jobRunStatus) => {
 };
 exports.logJobRunUrl = logJobRunUrl;
 const commentToPr = (notebookResult) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const prCommentGithubToken = core.getInput('pr-comment-github-token');
-        const octokit = github.getOctokit(prCommentGithubToken);
-        const githubContext = github.context;
-        yield octokit.rest.issues.createComment({
-            issue_number: githubContext.issue.number,
-            owner: githubContext.repo.owner,
-            repo: githubContext.repo.repo,
-            body: notebookResult
-        });
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            core.warning(`Attempted to add notebook run result as a PR comment. Failed due to: ${error.message}`);
-        }
-    }
+    const prCommentGithubToken = core.getInput('pr-comment-github-token');
+    const octokit = github.getOctokit(prCommentGithubToken);
+    const githubContext = github.context;
+    yield octokit.rest.issues.createComment({
+        issue_number: githubContext.issue.number,
+        owner: githubContext.repo.owner,
+        repo: githubContext.repo.repo,
+        body: notebookResult
+    });
 });
 exports.commentToPr = commentToPr;
 const shouldCommentToPr = () => {

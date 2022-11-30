@@ -213,25 +213,15 @@ export const logJobRunUrl = (jobRunUrl: string, jobRunStatus: string): void => {
 }
 
 export const commentToPr = async (notebookResult: string): Promise<void> => {
-  try {
-    const prCommentGithubToken: string = core.getInput(
-      'pr-comment-github-token'
-    )
-    const octokit = github.getOctokit(prCommentGithubToken)
-    const githubContext = github.context
-    await octokit.rest.issues.createComment({
-      issue_number: githubContext.issue.number,
-      owner: githubContext.repo.owner,
-      repo: githubContext.repo.repo,
-      body: notebookResult
-    })
-  } catch (error) {
-    if (error instanceof Error) {
-      core.warning(
-        `Attempted to add notebook run result as a PR comment. Failed due to: ${error.message}`
-      )
-    }
-  }
+  const prCommentGithubToken: string = core.getInput('pr-comment-github-token')
+  const octokit = github.getOctokit(prCommentGithubToken)
+  const githubContext = github.context
+  await octokit.rest.issues.createComment({
+    issue_number: githubContext.issue.number,
+    owner: githubContext.repo.owner,
+    repo: githubContext.repo.repo,
+    body: notebookResult
+  })
 }
 
 export const shouldCommentToPr = (): boolean => {
