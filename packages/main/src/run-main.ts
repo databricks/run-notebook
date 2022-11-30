@@ -50,7 +50,11 @@ async function runHelper(): Promise<void> {
     gitSourceSpec
   )
   if (utils.shouldCommentToPr()) {
-    await utils.commentToPr(runOutput.notebookOutput.result)
+    await utils.commentToPr(
+      runOutput.notebookOutput.result,
+      runOutput.runId,
+      runOutput.runUrl
+    )
   }
 
   core.setOutput(

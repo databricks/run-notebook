@@ -212,16 +212,39 @@ export const logJobRunUrl = (jobRunUrl: string, jobRunStatus: string): void => {
   core.info(`Notebook run has status ${jobRunStatus}. URL: ${jobRunUrl}`)
 }
 
-export const commentToPr = async (notebookResult: string): Promise<void> => {
-  const prCommentGithubToken: string = core.getInput('pr-comment-github-token')
-  const octokit = github.getOctokit(prCommentGithubToken)
-  const githubContext = github.context
-  await octokit.rest.issues.createComment({
-    issue_number: githubContext.issue.number,
-    owner: githubContext.repo.owner,
-    repo: githubContext.repo.repo,
-    body: notebookResult
-  })
+export const commentToPr = async (
+  notebookResult: string,
+  runId: number,
+  runUrl: string
+): Promise<void> => {
+  try {
+    const prCommentGithubToken: string = core.getInput(
+      'pr-comment-github-token'
+    )
+    const octokit = github.getOctokit(prCommentGithubToken)
+    const githubContext = github.context
+    const body = `### run-notebook github action results:
+#### Notebook run id: 
+${runId}
+
+#### Notebook run url: 
+${runUrl}
+
+
+#### Notebook Output:
+${notebookResult}
+`
+    await octokit.rest.issues.createComment({
+      issue_number: githubContext.issue.number,
+      owner: githubContext.repo.owner,
+      repo: githubContext.repo.repo,
+      body: body
+    })
+  } catch (e) {
+    core.warning(
+      `Attempted to add notebook run result as a PR comment. Failed due to: ${e}`
+    )
+  }
 }
 
 export const shouldCommentToPr = (): boolean => {
