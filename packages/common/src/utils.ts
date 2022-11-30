@@ -214,7 +214,9 @@ export const logJobRunUrl = (jobRunUrl: string, jobRunStatus: string): void => {
 
 export const commentToPr = async (notebookResult: string): Promise<void> => {
   try {
-    const prCommentGithubToken: string = core.getInput('pr-comment-github-token')
+    const prCommentGithubToken: string = core.getInput(
+      'pr-comment-github-token'
+    )
     const octokit = github.getOctokit(prCommentGithubToken)
     const githubContext = github.context
     await octokit.rest.issues.createComment({
@@ -233,6 +235,7 @@ export const commentToPr = async (notebookResult: string): Promise<void> => {
 }
 
 export const shouldCommentToPr = (): boolean => {
-  const prCommentGithubToken: string = core.getInput('pr-comment-github-token') || ''
+  const prCommentGithubToken: string =
+    core.getInput('pr-comment-github-token') || ''
   return prCommentGithubToken !== ''
 }

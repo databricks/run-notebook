@@ -462,7 +462,7 @@ const logJobRunUrl = (jobRunUrl, jobRunStatus) => {
 exports.logJobRunUrl = logJobRunUrl;
 const commentToPr = (notebookResult) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const prCommentGithubToken = core.getInput('pr-github-token');
+        const prCommentGithubToken = core.getInput('pr-comment-github-token');
         const octokit = github.getOctokit(prCommentGithubToken);
         const githubContext = github.context;
         yield octokit.rest.issues.createComment({
@@ -480,7 +480,7 @@ const commentToPr = (notebookResult) => __awaiter(void 0, void 0, void 0, functi
 });
 exports.commentToPr = commentToPr;
 const shouldCommentToPr = () => {
-    const prCommentGithubToken = core.getInput(' pr-comment-github-token') || '';
+    const prCommentGithubToken = core.getInput('pr-comment-github-token') || '';
     return prCommentGithubToken !== '';
 };
 exports.shouldCommentToPr = shouldCommentToPr;
