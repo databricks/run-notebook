@@ -468,14 +468,10 @@ const commentToPr = (notebookResult, runId, runUrl) => __awaiter(void 0, void 0,
         const body = `### run-notebook github action results:
 #### Notebook run id: 
 ${runId}
-
 #### Notebook run url: 
 ${runUrl}
-
-
 #### Notebook Output:
-${notebookResult}
-`;
+${notebookResult}`;
         yield octokit.rest.issues.createComment({
             issue_number: githubContext.issue.number,
             owner: githubContext.repo.owner,

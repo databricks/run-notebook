@@ -226,14 +226,10 @@ export const commentToPr = async (
     const body = `### run-notebook github action results:
 #### Notebook run id: 
 ${runId}
-
 #### Notebook run url: 
 ${runUrl}
-
-
 #### Notebook Output:
-${notebookResult}
-`
+${notebookResult}`
     await octokit.rest.issues.createComment({
       issue_number: githubContext.issue.number,
       owner: githubContext.repo.owner,
