@@ -190,15 +190,12 @@ inputs:
       then one can specify 'gitHubEnterprise'.
     required: false
     default: 'gitHub'
-  add-pr-comment:
-    description: >
-      A boolean flag for whether to comment to the PR that triggered this action with the Notebook result.
-    default: 'false'
-    required: false
-  pr-github-token:
+  pr-comment-github-token:
     description: >
       The Github Token for the repo that will be used to add a comment to the PR.
-      required: false
+      The comment will consist of the output of the notebook.
+      If the token is not provided there will be no attempt to comment on the PR.
+    required: false
 outputs:
   notebook-output:
     description: >

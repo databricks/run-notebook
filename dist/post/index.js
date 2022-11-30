@@ -461,12 +461,10 @@ const logJobRunUrl = (jobRunUrl, jobRunStatus) => {
 };
 exports.logJobRunUrl = logJobRunUrl;
 const commentToPr = (notebookResult) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     try {
-        const githubToken = core.getInput('pr-github-token');
-        const octokit = github.getOctokit(githubToken);
+        const prCommentGithubToken = core.getInput('pr-github-token');
+        const octokit = github.getOctokit(prCommentGithubToken);
         const githubContext = github.context;
-        const prNumber = ((_a = githubContext.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number) || '';
         yield octokit.rest.issues.createComment({
             issue_number: githubContext.issue.number,
             owner: githubContext.repo.owner,
@@ -482,9 +480,8 @@ const commentToPr = (notebookResult) => __awaiter(void 0, void 0, void 0, functi
 });
 exports.commentToPr = commentToPr;
 const shouldCommentToPr = () => {
-    const shouldAddComment = core.getInput('add-pr-comment');
-    const githubToken = core.getInput('github-token') || '';
-    return githubToken !== '' && shouldAddComment === 'true';
+    const prCommentGithubToken = core.getInput(' pr-comment-github-token') || '';
+    return prCommentGithubToken !== '';
 };
 exports.shouldCommentToPr = shouldCommentToPr;
 
