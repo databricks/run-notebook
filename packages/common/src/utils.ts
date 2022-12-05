@@ -238,7 +238,7 @@ ${notebookResult}`
     })
   } catch (e) {
     core.warning(
-      `Attempted to add notebook run result as a PR comment. Failed due to: ${e}`
+      `An error occurred when attempting to add a PR comment containing the notebook run result: ${e}`
     )
   }
 }
