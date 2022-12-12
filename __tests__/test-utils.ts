@@ -97,8 +97,16 @@ export const getInfoMock = (): jest.Mock => {
   return require('@actions/core').info as jest.Mock
 }
 
+export const getWarningMock = (): jest.Mock => {
+  return require('@actions/core').warning as jest.Mock
+}
+
 export const getIsDebugMock = (): jest.Mock => {
   return require('@actions/core').isDebug as jest.Mock
+}
+
+export const getGetOctokitMock = (): jest.Mock => {
+  return require('@actions/github').getOctokit as jest.Mock
 }
 
 export const getDebugMock = (): jest.Mock => {

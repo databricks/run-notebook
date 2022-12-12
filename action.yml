@@ -192,11 +192,12 @@ inputs:
     default: 'gitHub'
   pr-comment-github-token:
     description: >
-      If specified, this action will post a PR comment containing the notebook output on run completion, using the specified GitHub token to post the comment. Note that no comment will be posted if this action is used in a workflow triggered from a source other than a pull request (e.g. a manually triggered workflow)
-      The comment will consist of the output of the notebook.
-      If the token is not provided there will be no attempt to comment on the PR.
-      To use the sufficient default github token provided, set the value of this input to the env variable 'secrets.GITHUB_TOKEN'.
-      The token provided must have permission to comment on PR.( see 'Default access (permissive)' in https://docs.github.com/en/actions/security-guides/
+      If specified, this action will post a PR comment containing the notebook output on run completion, using the specified GitHub token to post the comment.
+      Note that no comment will be posted if this action is used in a workflow triggered from a source other than a pull request (e.g. a manually triggered workflow)
+      The comment will consist of the output of the notebook. If the token is not provided then there will be no attempt to comment on the PR.
+
+      For example, you can set the value of this input to ${{secrets.GITHUB_TOKEN}},
+      which by default has the necessary permissions to comment on PRs (see 'Default access (permissive)' in https://docs.github.com/en/actions/security-guides/
       automatic-token-authentication#permissions-for-the-github_token)
     required: false
 outputs:
