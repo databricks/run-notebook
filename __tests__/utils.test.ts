@@ -2,7 +2,9 @@ import * as utils from '../packages/common/src/utils'
 import {
   getDebugMock,
   getInfoMock,
+  getWarningMock,
   getIsDebugMock,
+  getGetOctokitMock,
   getSetFailedMock
 } from './test-utils'
 
@@ -10,9 +12,26 @@ jest.mock('@actions/core', () => {
   return {
     ...jest.requireActual('@actions/core'),
     debug: jest.fn(),
+    warning: jest.fn(),
     info: jest.fn(),
     isDebug: jest.fn(),
     setFailed: jest.fn()
+  }
+})
+
+jest.mock('@actions/github', () => {
+  return {
+    ...jest.requireActual('@actions/github'),
+    getOctokit: jest.fn(),
+    context: {
+      issue: {
+        number: '1234'
+      },
+      repo: {
+        owner: 'me',
+        repo: 'my-repo'
+      }
+    }
   }
 })
 
@@ -419,6 +438,72 @@ describe(`input utils`, () => {
         new Error(
           `workspace-temp-dir input must be an absolute Databricks workspace path. Got invalid path ${invalidPath}`
         )
+      )
+    })
+  })
+
+  describe('comment on pull request', () => {
+    afterEach(() => {
+      delete process.env['INPUT_PR-COMMENT-GITHUB-TOKEN']
+    })
+
+    test('shouldCommentToPr returns false if input not provided', () => {
+      expect(utils.shouldCommentToPr()).toEqual(false)
+    })
+
+    test('should comment on PR if provided token', async () => {
+      const validPRToken = 'my valid token'
+      process.env['INPUT_PR-COMMENT-GITHUB-TOKEN'] = validPRToken
+      const expectedNotebookResult = 'this is a notebook output'
+      const expectedNotebookPath = 'path/to/my/notebook'
+      const expectedRunUrl = 'my-url.com/jobs/run/1234'
+      const commentJest = jest.fn()
+
+      getGetOctokitMock().mockImplementation(() => {
+        return {
+          rest: {
+            issues: {
+              createComment: commentJest
+            }
+          }
+        }
+      })
+
+      expect(utils.shouldCommentToPr()).toEqual(true)
+      await utils.commentToPr(
+        expectedNotebookResult,
+        expectedNotebookPath,
+        expectedRunUrl
+      )
+
+      expect(commentJest).toBeCalledTimes(1)
+      expect(commentJest).toBeCalledWith({
+        issue_number: '1234',
+        owner: 'me',
+        repo: 'my-repo',
+        body: `### run-notebook github action results:
+#### Notebook path: 
+${expectedNotebookPath}
+#### Notebook run url: 
+${expectedRunUrl}
+#### Notebook Output:
+${expectedNotebookResult}`
+      })
+    })
+
+    test('should log warning if authentication fails', () => {
+      const invalidPRToken = 'invalid token'
+      process.env['INPUT_PR-COMMENT-GITHUB-TOKEN'] = invalidPRToken
+      const thrownError = new Error()
+
+      getGetOctokitMock().mockImplementation(() => {
+        throw thrownError
+      })
+
+      expect(utils.shouldCommentToPr()).toEqual(true)
+      utils.commentToPr('dsafasd', 'dsafsdf', 'sdfsadf')
+      expect(getWarningMock()).toBeCalledWith(
+        `An error occurred when attempting to add a PR comment containing the notebook run result: ${thrownError}`
       )
     })
   })

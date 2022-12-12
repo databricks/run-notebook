@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 import {isAbsolute} from 'path'
 
 export const getDatabricksHost = (): string => {
@@ -209,4 +210,54 @@ export const debugLogging = (logStatement: string): void => {
 
 export const logJobRunUrl = (jobRunUrl: string, jobRunStatus: string): void => {
   core.info(`Notebook run has status ${jobRunStatus}. URL: ${jobRunUrl}`)
+}
+
+export const commentToPr = async (
+  notebookResult: string,
+  notebookPath: string,
+  runUrl: string
+): Promise<void> => {
+  try {
+    const prCommentGithubToken: string = core.getInput(
+      'pr-comment-github-token'
+    )
+    const octokit = github.getOctokit(prCommentGithubToken)
+    const githubContext = github.context
+    const issueNumber = githubContext.issue?.number
+    const body = `### run-notebook github action results:
+#### Notebook path: 
+${notebookPath}
+#### Notebook run url: 
+${runUrl}
+#### Notebook Output:
+${notebookResult}`
+
+    // Only attempt to comment on PR if able to retrieve pull request info from context.
+    if (issueNumber) {
+      await octokit.rest.issues.createComment({
+        issue_number: issueNumber,
+        owner: githubContext.repo.owner,
+        repo: githubContext.repo.repo,
+        body: body
+      })
+    } else {
+      const docLink =
+        'https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request'
+      core.info(`
+        No issue number was found to use for commenting on pull request.
+        Please use 'pull_request' as workflow dispatch to add
+        a PR comment containing the notebook run result.(${docLink})
+      `)
+    }
+  } catch (e) {
+    core.warning(
+      `An error occurred when attempting to add a PR comment containing the notebook run result: ${e}`
+    )
+  }
+}
+
+export const shouldCommentToPr = (): boolean => {
+  const prCommentGithubToken: string =
+    core.getInput('pr-comment-github-token') || ''
+  return prCommentGithubToken !== ''
 }
