@@ -148,7 +148,7 @@ jobs:
           new-cluster-json: >
             {
               "num_workers": 1,
-              "spark_version": "10.4.x-scala2.12",
+              "spark_version": "11.3.x-scala2.12",
               "node_type_id": "Standard_D3_v2"
             }
           # Grant all users view permission on the notebook results
@@ -211,7 +211,7 @@ jobs:
           new-cluster-json: >
             {
               "num_workers": 1,
-              "spark_version": "10.4.x-scala2.12",
+              "spark_version": "11.3.x-scala2.12",
               "node_type_id": "Standard_D3_v2"
             }
           # Grant all users view permission on the notebook results, so that they can
@@ -296,7 +296,7 @@ jobs:
           new-cluster-json: >
             {
               "num_workers": 1,
-              "spark_version": "10.4.x-scala2.12",
+              "spark_version": "11.3.x-scala2.12",
               "node_type_id": "Standard_D3_v2"
             }
           # Grant all users view permission on the notebook results
@@ -344,7 +344,7 @@ jobs:
           new-cluster-json: >
             {
               "num_workers": 1,
-              "spark_version": "10.4.x-scala2.12",
+              "spark_version": "11.3.x-scala2.12",
               "node_type_id": "i3.xlarge"
             }
           # Grant users in the "devops" group view permission on the
@@ -368,7 +368,7 @@ jobs:
           new-cluster-json: >
             {
               "num_workers": 1,
-              "spark_version": "10.4.x-scala2.12",
+              "spark_version": "11.3.x-scala2.12",
               "node_type_id": "i3.xlarge"
             }
           # Grant users in the "devops" group view permission on the
