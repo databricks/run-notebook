@@ -61,7 +61,7 @@ export const getNotebookPath = (): string => {
 
     if (isGitRefSpecified()) {
       // Strip the file extension from the notebook path.
-      return localNotebookPath.split('.').slice(0, -1).join('.')
+      return localNotebookPath.split('.').slice(0, -1).join('.') || localNotebookPath
     } else {
       return localNotebookPath
     }
